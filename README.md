@@ -3,6 +3,8 @@
 
 #Storm MySql
 
+[![][license img]][license]
+
 Provides a Storm Spout implementation for consuming data from MySql Bin Logs.
 
 Based on [OpenReplicator](https://github.com/whitesock/open-replicator)
@@ -398,4 +400,5 @@ Not Supported
 
 * Sourav Mitra(@souravmitra)
 
-            
+[license]:LICENSE
+[license img]:https://img.shields.io/badge/License-Apache%202-blue.svg
