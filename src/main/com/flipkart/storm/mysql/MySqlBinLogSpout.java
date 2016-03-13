@@ -10,6 +10,7 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class MySqlBinLogSpout extends BaseRichSpout {
 
     public static final Logger  LOGGER                      = LoggerFactory.getLogger(MySqlBinLogSpout.class);
+    private static final ObjectMapper mapper                = new ObjectMapper();
     private long                msgAckCount                = 0;
     private long                msgSidelineCount           = 0;
     private long                msgFailedCount             = 0;
@@ -149,11 +151,12 @@ public class MySqlBinLogSpout extends BaseRichSpout {
             }
         }
 
+        try {
         if (txRetrEvent != null) {
             TransactionEvent txEvent = txRetrEvent.getTxEvent();
             this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
-            String txJson = JSONValue.toJSONString(txEvent);
-            BinLogPosition binLogPosition = new BinLogPosition(txEvent.getStartBinLogPosition(), txEvent.getStartBinLogFileName());
+                String txJson = mapper.writeValueAsString(txEvent);
+                BinLogPosition binLogPosition = new BinLogPosition(txEvent.getStartBinLogPosition(), txEvent.getStartBinLogFileName());
             long scn = binLogPosition.getSCN();
             this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
             this.lastEmittedBeginTxPosition = binLogPosition;
@@ -164,6 +167,10 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         if (diffWithNow > this.spoutConfig.getZkBinLogStateConfig().getZkScnUpdateRateInMs() || diffWithNow < 0) {
             commit();
         }
+        } catch (Exception ex) {
+            LOGGER.error("Error occurred in processing event {}:", txRetrEvent);
+        }
+
     }
 
     @Override

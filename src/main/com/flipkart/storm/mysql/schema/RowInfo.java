@@ -13,4 +13,11 @@ public class RowInfo {
     public List<ColumnInfo> getColumnInfo() {
         return columnInfoList;
     }
+
+    @Override
+    public String toString() {
+        return "RowInfo{" +
+                "columnInfoList=" + columnInfoList +
+                '}';
+    }
 }

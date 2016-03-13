@@ -23,4 +23,13 @@ public class ColumnInfo {
     public ColumnDataType getColumnDataType() {
         return columnDataType;
     }
+
+    @Override
+    public String toString() {
+        return "ColumnInfo{" +
+                "name='" + name + '\'' +
+                ", position=" + position +
+                ", columnDataType=" + columnDataType +
+                '}';
+    }
 }

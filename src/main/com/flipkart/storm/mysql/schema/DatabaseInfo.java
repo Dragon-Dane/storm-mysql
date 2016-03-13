@@ -17,7 +17,7 @@ public class DatabaseInfo {
         return this.tableInfoMap.get(tableName);
     }
 
-    public Set<String> getAllTableNames(String databaseName) {
+    public Set<String> getAllTableNames() {
         return tableInfoMap.keySet();
     }
 
@@ -25,5 +25,11 @@ public class DatabaseInfo {
         return databaseName;
     }
 
-
+    @Override
+    public String toString() {
+        return "DatabaseInfo{" +
+                "databaseName='" + databaseName + '\'' +
+                ", tableInfoMap=" + tableInfoMap +
+                '}';
+    }
 }

@@ -71,7 +71,7 @@ public class MySqlClient {
         ResultSet resultSet = meta.getTables(null, null, null, new String[] {"TABLE"});
         Set<String> tableSet = new HashSet<String>();
         while (resultSet.next()) {
-            tableSet.add(resultSet.getString("TABLE_NAME"));
+            tableSet.add(resultSet.getString("TABLE_NAME").toLowerCase());
         }
         resultSet.close();
         return tableSet;

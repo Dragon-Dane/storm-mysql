@@ -129,8 +129,8 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                 if (tableName != null && txBuilder.getInnerTxState() == TransactionState.STARTED) {
 
                     DataEvent dataEvent = new DataEvent(tableName, DataEventType.DELETE,
-                                                        getData(tableName, deleteRowsEvent.getRows()),
-                                                        null);
+                                                        null,
+                                                        getData(tableName, deleteRowsEvent.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
                 break;
@@ -141,8 +141,8 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                 if (tableName != null && txBuilder.getInnerTxState() == TransactionState.STARTED) {
 
                     DataEvent dataEvent = new DataEvent(tableName, DataEventType.DELETE,
-                                                        getData(tableName, deleteRowsEventV2.getRows()),
-                                                        null);
+                                                        null,
+                                                        getData(tableName, deleteRowsEventV2.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
                 break;
@@ -154,7 +154,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                     String databaseName = tableMapEvent.getDatabaseName().toString();
                     tableName = tableMapEvent.getTableName().toString();
                     if (databaseName.equals(this.databaseInfo.getDatabaseName())) {
-                        if (this.databaseInfo.getAllTableNames(databaseName).contains(tableName)) {
+                        if (this.databaseInfo.getAllTableNames().contains(tableName)) {
                             this.tableCache.put(tableId, tableName);
                         }
                     }

@@ -14,7 +14,7 @@ public class MySqlConfig implements Serializable {
     private final int       binLogPosition;
     private final String    binLogFileName;
     private final String    database;
-    private final Set<String> tables;
+    private final Set<String> includeTables;
 
     private MySqlConfig(Builder builder) {
         this.user           = builder.innerUser;
@@ -25,7 +25,7 @@ public class MySqlConfig implements Serializable {
         this.binLogPosition = builder.innerBinLogPosition;
         this.binLogFileName = builder.innerBinLogFileName;
         this.database       = builder.innerDatabase;
-        this.tables         = builder.innerTables;
+        this.includeTables  = builder.innerTables;
     }
 
     public String getUser() {
@@ -61,7 +61,7 @@ public class MySqlConfig implements Serializable {
     }
 
     public Set<String> getTables() {
-        return tables;
+        return includeTables;
     }
 
     public static class Builder {
@@ -115,7 +115,7 @@ public class MySqlConfig implements Serializable {
             return this;
         }
 
-        public Builder tables(Set<String> tables) {
+        public Builder includeTables(Set<String> tables) {
             this.innerTables = tables;
             return this;
         }

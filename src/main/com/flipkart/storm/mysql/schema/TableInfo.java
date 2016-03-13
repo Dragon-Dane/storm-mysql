@@ -13,4 +13,12 @@ public class TableInfo {
     public RowInfo getRowInfo() {
         return rowInfo;
     }
+
+    @Override
+    public String toString() {
+        return "TableInfo{" +
+                "tableName='" + tableName + '\'' +
+                ", rowInfo=" + rowInfo +
+                '}';
+    }
 }

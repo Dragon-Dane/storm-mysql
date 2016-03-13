@@ -1,5 +1,6 @@
 package com.flipkart.storm.mysql;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,22 +40,22 @@ public class TransactionEvent {
         return serverId;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public int getStartBinLogPosition() {
         return startBinLogPosition;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public String getStartBinLogFileName() {
         return startBinLogFileName;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public int getEndBinLogPosition() {
         return endBinLogPosition;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public String getEndBinLogFileName() {
         return endBinLogFileName;
     }
@@ -63,20 +64,22 @@ public class TransactionEvent {
         return dataEvents;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public Long getTransactionId() {
         return txId;
     }
 
-    //@JsonIgnore
+    @JsonIgnore
     public TransactionState getTransactionState() {
         return txState;
     }
 
+    @JsonIgnore
     public long getStartTimeInNanos() {
         return startTimeInNanos;
     }
 
+    @JsonIgnore
     public long getEndTimeInNanos() {
         return endTimeInNanos;
     }

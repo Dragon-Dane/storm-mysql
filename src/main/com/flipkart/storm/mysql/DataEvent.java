@@ -8,16 +8,16 @@ public class DataEvent {
     private final String                    tableName;
     private final DataEventType             dataEventType;
     private final List<Map<String, Object>> oldData;
-    private final List<Map<String, Object>> newData;
+    private final List<Map<String, Object>> data;
 
     public DataEvent(String tableName,
                      DataEventType dataEventType,
                      List<Map<String, Object>> oldData,
-                     List<Map<String, Object>> newData) {
+                     List<Map<String, Object>> data) {
         this.tableName      = tableName;
         this.dataEventType  = dataEventType;
         this.oldData        = oldData;
-        this.newData        = newData;
+        this.data           = data;
     }
 
     public String getTableName() {
@@ -32,8 +32,8 @@ public class DataEvent {
         return oldData;
     }
 
-    public List<Map<String, Object>> getNewData() {
-        return newData;
+    public List<Map<String, Object>> getData() {
+        return data;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DataEvent {
                 "tableName='" + tableName + '\'' +
                 ", dataEventType=" + dataEventType +
                 ", oldData=" + oldData +
-                ", newData=" + newData +
+                ", data=" + data +
                 '}';
     }
 }
