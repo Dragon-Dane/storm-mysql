@@ -1,5 +1,7 @@
-Storm MySql
-====================
+<img src="https://github.com/flipkart-incubator/storm-mysql/blob/master/images/StormSpout.png">
+
+
+#Storm MySql
 
 Provides a Storm Spout implementation for consuming data from MySql Bin Logs.
 
