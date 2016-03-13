@@ -92,7 +92,7 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
     }
 
 
-For more event examples [Events.md](Events.md)
+For more event examples [Events.md](https://github.com/flipkart-incubator/storm-mysql/blob/master/EVENTS.md)
 
 
 ##The Spout
