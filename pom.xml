@@ -17,6 +17,14 @@
         <url>https://github.com/flipkart-incubator/storm-mysql</url>
     </scm>
 
+    <repositories>
+        <repository>
+            <id>clojars</id>
+            <name>Clojars repository</name>
+            <url>https://clojars.org/repo</url>
+        </repository>
+    </repositories>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -26,7 +34,7 @@
 
     <properties>
         <hikari-version>2.4.3</hikari-version>
-        <openreplicator-version>1.0.7</openreplicator-version>
+        <openreplicator-version>1.0.8</openreplicator-version>
         <junit-version>4.11</junit-version>
         <curator-version>2.9.0</curator-version>
         <storm-version>0.9.5</storm-version>
@@ -82,9 +90,23 @@
             <version>${hikari-version}</version>
         </dependency>
         <dependency>
-            <groupId>open-replicator</groupId>
+            <groupId>com.flipkart</groupId>
             <artifactId>open-replicator</artifactId>
             <version>${openreplicator-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

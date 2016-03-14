@@ -188,7 +188,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                 .txTimeStart(System.nanoTime())
                                 .database(databaseName)
                                 .serverId(toIntExact(queryEvent.getHeader().getServerId()))
-                                .startBinLogFileName(queryEvent.getHeader().getBinlogFileName())
+                                //.startBinLogFileName(queryEvent.getHeader().getBinlogFileName())
                                 .startBinLogPos(toIntExact(queryEvent.getHeader().getPosition()));
                     }
                 }
@@ -202,7 +202,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                     TransactionEvent txEvent = txBuilder.txState(TransactionState.END)
                                                         .txTimeEnd(System.nanoTime())
                                                         .txId(xidEvent.getXid())
-                                                        .endBinLogFileName(xidEvent.getHeader().getBinlogFileName())
+                                                        //.endBinLogFileName(xidEvent.getHeader().getBinlogFileName())
                                                         .endBinLogPos(toIntExact(xidEvent.getHeader().getNextPosition()))
                                                         .build();
                     this.queue.offer(txEvent);
