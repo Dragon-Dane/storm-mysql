@@ -4,6 +4,7 @@
 #Storm MySql
 
 [![][travis img]][travis]
+[![][coverage img]][coverage]
 [![][license img]][license]
 
 Provides a Storm Spout implementation for consuming data from MySql Bin Logs.
@@ -411,5 +412,7 @@ Not Supported
 
 [travis]:https://travis-ci.org/flipkart-incubator/storm-mysql
 [travis img]:https://travis-ci.org/flipkart-incubator/storm-mysql.svg?branch=master
+[coverage]:https://coveralls.io/github/flipkart-incubator/storm-mysql?branch=master
+[coverage img]:https://coveralls.io/repos/github/flipkart-incubator/storm-mysql/badge.svg?branch=master
 [license]:LICENSE
 [license img]:https://img.shields.io/badge/License-Apache%202-blue.svg
