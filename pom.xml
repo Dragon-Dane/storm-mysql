@@ -33,6 +33,7 @@
     </licenses>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hikari-version>2.4.3</hikari-version>
         <openreplicator-version>1.0.8</openreplicator-version>
         <junit-version>4.11</junit-version>
