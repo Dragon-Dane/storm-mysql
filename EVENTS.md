@@ -18,7 +18,7 @@ Database "test" with the following tables:
 
     mysql> insert into ATable(id, salary, name, dept) values(100001, 50000, 'Emp001', 'Finance');
     
-    Event Generated
+Event Generated
     
 ```javascript
 {
@@ -42,7 +42,7 @@ Database "test" with the following tables:
 
     mysql> update ATable set salary=60000, dept='Sales' where id=100001;
     
-    Event Generated
+Event Generated
     
 ```javascript
 {
@@ -71,7 +71,7 @@ Database "test" with the following tables:
 
     mysql> delete from ATable where id=100001; 
     
-    Event Generated
+Event Generated
 
 ```javascript
 {
@@ -99,7 +99,7 @@ Database "test" with the following tables:
     mysql> insert into CTable(id, manager) values(100005, 'Abhi');
     mysql> commit;
     
-    Event Generated
+Event Generated
 
 ```javascript
 {
@@ -141,7 +141,7 @@ Database "test" with the following tables:
     mysql> UPDATE ATable, BTable, CTable SET ATable.salary=70000, BTable.address='Jupiter Street - 0002',
             CTable.manager='Box' WHERE ATable.id=100005 AND BTable.id=100005 AND CTable.id=100005;
             
-    Event Generated
+Event Generated
     
 ```javascript
 {
@@ -192,7 +192,7 @@ Database "test" with the following tables:
 
     mysql> update ATable set salary=90000 where name='Emp002';
     
-    Event Generated
+Event Generated
     
 ```javascript
 {

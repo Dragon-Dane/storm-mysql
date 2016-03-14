@@ -3,6 +3,7 @@
 
 #Storm MySql
 
+[![][travis img]][travis]
 [![][license img]][license]
 
 Provides a Storm Spout implementation for consuming data from MySql Bin Logs.
@@ -31,7 +32,7 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
 
     mysql> insert into ATable(id, salary, name, dept) values(100001, 50000, 'Emp001', 'Finance');
     
-    Event Generated
+Event Generated
 
 ```javascript
 {
@@ -55,7 +56,7 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
 
     mysql> update ATable set salary=60000, dept='Sales' where id=100001;
     
-    Event Generated
+Event Generated
 
 ```javascript
 {
@@ -84,7 +85,7 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
 
     mysql> delete from ATable where id=100001; 
     
-    Event Generated
+Event Generated
 
 ```javascript
 {
@@ -408,5 +409,7 @@ Not Supported
 
 * Sourav Mitra(@souravmitra)
 
+[travis]:https://travis-ci.org/flipkart-incubator/storm-mysql
+[travis img]:https://travis-ci.org/flipkart-incubator/storm-mysql.svg?branch=master
 [license]:LICENSE
 [license img]:https://img.shields.io/badge/License-Apache%202-blue.svg
