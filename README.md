@@ -32,47 +32,53 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
     mysql> insert into ATable(id, salary, name, dept) values(100001, 50000, 'Emp001', 'Finance');
     
     Event Generated
-    
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   :[ { "tableName"       : "atable",
-                          "dataEventType"   : "INSERT",
-                          "oldData"         : null,
-                          "data"            : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Finance",
-                                                    "salary"    : 50000
-                                                }
-                                              ]
-                          }
-                       ]
-    }
+
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "INSERT",
+        "oldData": null,
+        "data": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Finance",
+            "salary": 50000
+        }]
+    }]
+}
+```
     
 #### An Update
 
     mysql> update ATable set salary=60000, dept='Sales' where id=100001;
     
     Event Generated
-    
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   :[ { "tableName"       : "atable",
-                          "dataEventType"   : "UPDATE",
-                          "oldData"         : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Finance",
-                                                    "salary"    : 50000
-                                                }
-                                              ],
-                          "data"            : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Sales",
-                                                    "salary"    : 60000
-                                                }
-                                              ]
-                          }
-                       ]
-    }
+
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Finance",
+            "salary": 50000
+        }],
+        "data": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Sales",
+            "salary": 60000
+        }]
+    }]
+}
+```
     
 #### A Delete
 
@@ -80,21 +86,23 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
     
     Event Generated
 
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   : [ { "tableName"     : "atable",
-                           "dataEventType" : "DELETE",
-                           "oldData"       : null,
-                           "data"          : [ { "name"     :   "Emp001",
-                                                 "id"       :   100001,
-                                                 "dept"     :   "Sales",
-                                                 "salary"   :   60000
-                                               }
-                                             ]
-                           }
-                        ]
-    }
-
+```javascript
+{
+     "databaseName": "test",
+     "serverId": 1,
+     "dataEvents": [{
+         "tableName": "atable",
+         "dataEventType": "DELETE",
+         "oldData": null,
+         "data": [{
+             "name": "Emp001",
+             "id": 100001,
+             "dept": "Sales",
+             "salary": 60000
+         }]
+     }]
+}
+```
 
 For more event examples [Events.md](https://github.com/flipkart-incubator/storm-mysql/blob/master/EVENTS.md)
 

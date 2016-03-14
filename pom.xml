@@ -1,15 +1,53 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.flipkart.storm-mysql</groupId>
-  <artifactId>storm-mysql</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
-  <name>storm-mysql</name>
-  <url>http://maven.apache.org</url>
-
-
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flipkart.storm-mysql</groupId>
+    <artifactId>storm-mysql</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <name>storm-mysql</name>
     <description>Storm Spout for Mysql Bin Logs</description>
+
+    <url>https://github.com/flipkart-incubator/storm-mysql#readme</url>
+
+    <scm>
+        <connection>scm:git:https://github.com/flipkart-incubator/storm-mysql.git</connection>
+        <developerConnection>scm:git:https://github.com/flipkart-incubator/storm-mysql.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/flipkart-incubator/storm-mysql</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <hikari-version>2.4.3</hikari-version>
+        <openreplicator-version>1.0.7</openreplicator-version>
+        <junit-version>4.11</junit-version>
+        <curator-version>2.9.0</curator-version>
+        <storm-version>0.9.5</storm-version>
+        <mysql-connector-version>5.1.38</mysql-connector-version>
+        <jackson-version>2.5.1</jackson-version>
+    </properties>
+
+    <developers>
+        <developer>
+            <id>souravmitra</id>
+            <name>Sourav Mitra</name>
+            <email>souravmitr(at)gmail(dot)com</email>
+            <roles>
+                <role>design</role>
+                <role>development</role>
+            </roles>
+            <organization>Flipkart</organization>
+            <organizationUrl>http://www.flipkart.com/</organizationUrl>
+        </developer>
+    </developers>
+
     <build>
         <plugins>
             <plugin>
@@ -41,23 +79,23 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>2.4.3</version>
+            <version>${hikari-version}</version>
         </dependency>
         <dependency>
             <groupId>open-replicator</groupId>
             <artifactId>open-replicator</artifactId>
-            <version>1.0.7</version>
+            <version>${openreplicator-version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>${junit-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
-            <version>2.9.0</version>
+            <version>${curator-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -72,7 +110,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
-            <version>2.9.0</version>
+            <version>${curator-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -84,7 +122,7 @@
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
-            <version>2.9.0</version>
+            <version>${curator-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -100,18 +138,18 @@
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-core</artifactId>
-            <version>0.9.5</version>
+            <version>${storm-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.38</version>
+            <version>${mysql-connector-version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.5.1</version>
+            <version>${jackson-version}</version>
         </dependency>
     </dependencies>
 </project>

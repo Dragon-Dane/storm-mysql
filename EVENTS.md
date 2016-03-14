@@ -20,20 +20,23 @@ Database "test" with the following tables:
     
     Event Generated
     
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   :[ { "tableName"       : "atable",
-                          "dataEventType"   : "INSERT",
-                          "oldData"         : null,
-                          "data"            : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Finance",
-                                                    "salary"    : 50000
-                                                }
-                                              ]
-                          }
-                       ]
-    }
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "INSERT",
+        "oldData": null,
+        "data": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Finance",
+            "salary": 50000
+        }]
+    }]
+}
+```
     
 #### An Update
 
@@ -41,25 +44,28 @@ Database "test" with the following tables:
     
     Event Generated
     
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   :[ { "tableName"       : "atable",
-                          "dataEventType"   : "UPDATE",
-                          "oldData"         : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Finance",
-                                                    "salary"    : 50000
-                                                }
-                                              ],
-                          "data"            : [ {   "name"      : "Emp001",
-                                                    "id"        : 100001,
-                                                    "dept"      : "Sales",
-                                                    "salary"    : 60000
-                                                }
-                                              ]
-                          }
-                       ]
-    }
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Finance",
+            "salary": 50000
+        }],
+        "data": [{
+            "name": "Emp001",
+            "id": 100001,
+            "dept": "Sales",
+            "salary": 60000
+        }]
+    }]
+}
+```
     
 #### A Delete
 
@@ -67,20 +73,23 @@ Database "test" with the following tables:
     
     Event Generated
 
-    { "databaseName" : "test",
-      "serverId"     : 1,
-      "dataEvents"   : [ { "tableName"     : "atable",
-                           "dataEventType" : "DELETE",
-                           "oldData"       : null,
-                           "data"          : [ { "name"     :   "Emp001",
-                                                 "id"       :   100001,
-                                                 "dept"     :   "Sales",
-                                                 "salary"   :   60000
-                                               }
-                                             ]
-                           }
-                        ]
-    }
+```javascript
+{
+     "databaseName": "test",
+     "serverId": 1,
+     "dataEvents": [{
+         "tableName": "atable",
+         "dataEventType": "DELETE",
+         "oldData": null,
+         "data": [{
+             "name": "Emp001",
+             "id": 100001,
+             "dept": "Sales",
+             "salary": 60000
+         }]
+     }]
+}
+```
        
 #### A Transaction involving multiple tables
 
@@ -91,36 +100,40 @@ Database "test" with the following tables:
     mysql> commit;
     
     Event Generated
-    
-    {   "databaseName"  : "test",
-        "serverId"      : 1,
-        "dataEvents"    : [ { "tableName"       : "atable",
-                              "dataEventType"   : "INSERT",
-                              "oldData"         : null,
-                              "data"            : [ { "name"    :   "Emp002",
-                                                      "id"      :   100005,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   50000
-                                                      }
-                                                    ]
-                            },
-                            { "tableName"       : "btable",
-                              "dataEventType"   : "INSERT",
-                              "oldData"         : null,
-                              "data"            : [ { "address" :   "Mars Street - 0007",
-                                                      "id"      :   100005
-                                                     }
-                                                   ]
-                            },
-                            { "tableName"       : "ctable",
-                              "dataEventType"   : "INSERT",
-                              "oldData"         : null,
-                              "data"            : [ { "manager" :   "Abhi",
-                                                      "id"      :   100005
-                                                    }
-                                                   ]
-                            } ]
-    }
+
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "INSERT",
+        "oldData": null,
+        "data": [{
+            "name": "Emp002",
+            "id": 100005,
+            "dept": "HR",
+            "salary": 50000
+        }]
+    }, {
+        "tableName": "btable",
+        "dataEventType": "INSERT",
+        "oldData": null,
+        "data": [{
+            "address": "Mars Street - 0007",
+            "id": 100005
+        }]
+    }, {
+        "tableName": "ctable",
+        "dataEventType": "INSERT",
+        "oldData": null,
+        "data": [{
+            "manager": "Abhi",
+            "id": 100005
+        }]
+    }]
+}
+```
     
 
 #### Multi Update Across Tables
@@ -130,47 +143,50 @@ Database "test" with the following tables:
             
     Event Generated
     
-    {   "databaseName" : "test",
-        "serverId"     : 1,
-        "dataEvents"   : [ { "tableName"        : "btable",
-                             "dataEventType"    :"UPDATE",
-                             "oldData"          : [ { "address" :   "Mars Street - 0007",
-                                                      "id"      :   100005
-                                                    }
-                                                  ],
-                             "data"             : [ { "address" :   "Jupiter Street - 0002",
-                                                      "id"      :   100005
-                                                     }
-                                                   ]
-                            },
-                            { "tableName"       : "atable",
-                              "dataEventType"   : "UPDATE",
-                              "oldData"         : [ { "name"    :   "Emp002",
-                                                      "id"      :   100005,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   50000
-                                                     }
-                                                   ],
-                              "data"            : [ { "name"    :   "Emp002",
-                                                      "id"      :   100005,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   70000
-                                                     }
-                                                   ]
-                            },
-                            { "tableName"       : "ctable",
-                              "dataEventType"   : "UPDATE",
-                              "oldData"         : [ { "manager" :   "Abhi",
-                                                      "id"      :   100005
-                                                     }
-                                                  ],
-                              "data"            : [ { "manager" :   "Box",
-                                                      "id"      :   100005
-                                                     }
-                                                  ]
-                            }
-                          ]
-    }
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "btable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "address": "Mars Street - 0007",
+            "id": 100005
+        }],
+        "data": [{
+            "address": "Jupiter Street - 0002",
+            "id": 100005
+        }]
+    }, {
+        "tableName": "atable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "name": "Emp002",
+            "id": 100005,
+            "dept": "HR",
+            "salary": 50000
+        }],
+        "data": [{
+            "name": "Emp002",
+            "id": 100005,
+            "dept": "HR",
+            "salary": 70000
+        }]
+    }, {
+        "tableName": "ctable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "manager": "Abhi",
+            "id": 100005
+        }],
+        "data": [{
+            "manager": "Box",
+            "id": 100005
+        }]
+    }]
+}
+```
     
 ####Multi Update in the same table
 
@@ -178,34 +194,37 @@ Database "test" with the following tables:
     
     Event Generated
     
-    {   "databaseName"  : "test",
-        "serverId"      : 1,
-        "dataEvents"    : [ { "tableName"       :   "atable",
-                              "dataEventType"   :   "UPDATE",
-                              "oldData"         : [ { "name"    :   "Emp002",
-                                                      "id"      :   100002,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   50000
-                                                      },
-                                                     { "name"   :   "Emp002",
-                                                       "id"     :   100005,
-                                                       "dept"   :   "HR",
-                                                       "salary" :   70000
-                                                     }
-                                                   ],
-                              "data"            : [ { "name"    :   "Emp002",
-                                                      "id"      :   100002,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   90000
-                                                    },
-                                                    { "name"    :   "Emp002",
-                                                      "id"      :   100005,
-                                                      "dept"    :   "HR",
-                                                      "salary"  :   90000
-                                                    }
-                                                   ]
-                              }
-                            ]
-    }
-    
+```javascript
+{
+    "databaseName": "test",
+    "serverId": 1,
+    "dataEvents": [{
+        "tableName": "atable",
+        "dataEventType": "UPDATE",
+        "oldData": [{
+            "name": "Emp002",
+            "id": 100002,
+            "dept": "HR",
+            "salary": 50000
+        }, {
+            "name": "Emp002",
+            "id": 100005,
+            "dept": "HR",
+            "salary": 70000
+        }],
+        "data": [{
+            "name": "Emp002",
+            "id": 100002,
+            "dept": "HR",
+            "salary": 90000
+        }, {
+            "name": "Emp002",
+            "id": 100005,
+            "dept": "HR",
+            "salary": 90000
+        }]
+    }]
+}
+```
+
     Note that oldData[i] corresponds to data[i].
