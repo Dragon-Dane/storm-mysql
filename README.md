@@ -31,7 +31,9 @@ A Table "ATable" with (`id` int(11) DEFAULT NULL, `salary` int(11) DEFAULT NULL,
 
 #### An Insert
 
-    mysql> insert into ATable(id, salary, name, dept) values(100001, 50000, 'Emp001', 'Finance');
+```javascript
+mysql> insert into ATable(id, salary, name, dept) values(100001, 50000, 'Emp001', 'Finance');
+```
     
 Event Generated
 
@@ -55,7 +57,9 @@ Event Generated
     
 #### An Update
 
-    mysql> update ATable set salary=60000, dept='Sales' where id=100001;
+```javascript
+mysql> update ATable set salary=60000, dept='Sales' where id=100001;
+```
     
 Event Generated
 
@@ -84,8 +88,10 @@ Event Generated
     
 #### A Delete
 
-    mysql> delete from ATable where id=100001; 
-    
+```javascript
+mysql> delete from ATable where id=100001; 
+```
+
 Event Generated
 
 ```javascript
@@ -113,8 +119,10 @@ For more event examples [Events.md](https://github.com/flipkart-incubator/storm-
 
 In order to initialize your MySql spout, you need to construct an instance of the MySqlSpoutConfig.
 
-    public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig)
-    public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig, FailureConfig failureConfig)
+```java
+public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig)
+public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig, FailureConfig failureConfig)
+```
 
 ### MySqlConfig
 
@@ -123,15 +131,17 @@ and reads data off the bin logs.
 
 Parameters that are currently supported are:
 
-    private final String    user;               //Default : "sa"
-    private final String    password;           //Default : ""
-    private final String    host;               //Default : "localhost"
-    private final int       port;               //Default : 3306
-    private final int       serverId;           //Default : 1
-    private final int       binLogPosition;     //Default : 4
-    private final String    binLogFileName;
-    private final String    database;
-    private final Set<String> includeTables;
+```java
+private final String    user;               //Default : "sa"
+private final String    password;           //Default : ""
+private final String    host;               //Default : "localhost"
+private final int       port;               //Default : 3306
+private final int       serverId;           //Default : 1
+private final int       binLogPosition;     //Default : 4
+private final String    binLogFileName;
+private final String    database;
+private final Set<String> includeTables;
+```
 
 Most of the parameters are self explanatory, but for binlogFileName and tables.
 Database is the only mandatory parameter that has to provided for. All others have been provided sensible defaults.
@@ -145,17 +155,21 @@ filtering.
 If there are are a total of three tables in the database 'A', 'B' and 'C' and if only 'A' and 'B' were in the include table list,
 the spout will filter out all events pertaining to table 'C'.
 Please also note that even if there is a transaction involving all three tables, 
-    
-    start transaction
-        insert into 'A'
-        update some row in 'C'
-        update some row in 'B'
-    commit
+
+```javascript
+start transaction
+    insert into 'A'
+    update some row in 'C'
+    update some row in 'B'
+commit
+```
 
 then also the event for 'C' will be filtered out. The stream will only contain two events:
 
-    insert into 'A'
-    update some row in 'B'
+```javascript
+insert into 'A'
+update some row in 'B'
+```
 
 The "binlogFileName" is the file, where the spout will start reading from the "binLogPosition".
 If this is not provided, the spout will take this data from the MySql Server automatically.
@@ -163,32 +177,38 @@ So if you are unsure, do not provide this and binlogPosition as well.
 
 If you want to have a look at where your MySql is currently storing its binlog offsets, just do a
 
-    mysql> show master status;
+```javascript
+mysql> show master status;
+```
     
 ####Very Important
 
 For the spout and all this to work correctly, please do ensure that binary logging is turned on.
 Please consider the parameters below as an example, to be set in your "mysql.cnf" file.
 
-    binlog-checksum                = NONE
-    expire_logs_days               = 4
-    sync_binlog                    = 1
-    server-id                      = 1
-    log-bin                        = /var/lib/mysql/mysql-bin.log
-    binlog_format                  = ROW
+```javascript
+binlog-checksum                = NONE
+expire_logs_days               = 4
+sync_binlog                    = 1
+server-id                      = 1
+log-bin                        = /var/lib/mysql/mysql-bin.log
+binlog_format                  = ROW
+```
     
 ####Creating a Java Instance, an Example
 
-    MySqlConfig mySqlConfig = new MySqlConfig.Builder("testDatabase")
-                                                 .user("testUser")
-                                                 .password("testPass")
-                                                 .host("localhost")
-                                                 .port(3306)
-                                                 .serverId(1)
-                                                 .binLogFilename("mysql-bin.000017")
-                                                 .binLogPosition(4)
-                                                 .tables(Sets.newHashSet("ATable", "BTable"))
-                                                 .build();
+```java
+MySqlConfig mySqlConfig = new MySqlConfig.Builder("testDatabase")
+                                             .user("testUser")
+                                             .password("testPass")
+                                             .host("localhost")
+                                             .port(3306)
+                                             .serverId(1)
+                                             .binLogFilename("mysql-bin.000017")
+                                             .binLogPosition(4)
+                                             .tables(Sets.newHashSet("ATable", "BTable"))
+                                             .build();
+```
                                                  
 ### ZkBinLogStateConfig
 
@@ -197,16 +217,18 @@ stores and reads its binlog offset from Zookeeper.
 
 Parameters that are currently supported are:
 
-    private final List<String>  zkServers;
-    private final int           zkPort;
-    private final String        zkRoot;
-    private final String        zkSpoutId;
-    private final int           zkScnUpdateRateInMs;
-    private final Integer       zkSessionTimeoutInMs;
-    private final Integer       zkConnectionTimeoutInMs;
-    private final Integer       zkRetryTimes;
-    private final Integer       zkSleepMsBetweenRetries;
-    private final boolean       zkIgnoreBinLogPosition;
+```java
+private final List<String>  zkServers;
+private final int           zkPort;
+private final String        zkRoot;
+private final String        zkSpoutId;
+private final int           zkScnUpdateRateInMs;
+private final Integer       zkSessionTimeoutInMs;
+private final Integer       zkConnectionTimeoutInMs;
+private final Integer       zkRetryTimes;
+private final Integer       zkSleepMsBetweenRetries;
+private final boolean       zkIgnoreBinLogPosition;
+```
 
 Let us understand all of them one by one:
 
@@ -270,17 +292,18 @@ want to start from the current file and position as in your Mysql.
 This example contains all fields, please remove the fields when building an instance, which you are think are not required
 and defaults would suffice.
 
-    ZkBinLogStateConfig zkBinLogStateConfig = new ZkBinLogStateConfig.Builder("my-spout")
-                                                                     .servers(Lists.newArrayList("localhost"))
-                                                                     .port(2181)
-                                                                     .root("mysql-binlog-spout")
-                                                                     .ignoreZkBinLogPosition(false)
-                                                                     .sessionTimeOutInMs(100)
-                                                                     .retryTimes(5)
-                                                                     .connectionTimeOutInMs(100)
-                                                                     .updateRate(1000)
-                                                                     .build();
-
+```java
+ZkBinLogStateConfig zkBinLogStateConfig = new ZkBinLogStateConfig.Builder("my-spout")
+                                                                 .servers(Lists.newArrayList("localhost"))
+                                                                 .port(2181)
+                                                                 .root("mysql-binlog-spout")
+                                                                 .ignoreZkBinLogPosition(false)
+                                                                 .sessionTimeOutInMs(100)
+                                                                 .retryTimes(5)
+                                                                 .connectionTimeOutInMs(100)
+                                                                 .updateRate(1000)
+                                                                 .build();
+```
 
 ### FailureConfig
 
@@ -288,15 +311,19 @@ FailureConfig contains the information on what the spout should do for failed me
 
 Parameters that are currently being considered:
 
-    private final int               numMaxRetries;
-    private final long              numMaxTotalFailAllowed;
-    private final SidelineStrategy  sidelineStrategy;
+```java
+private final int               numMaxRetries;
+private final long              numMaxTotalFailAllowed;
+private final SidelineStrategy  sidelineStrategy;
+```
 
 When a failureConfig is not provided a default configuration is taken, where
 
+```javascript
     numMaxRetries = 10;
     numMaxTotalFailAllowed = 1000000;
     sidelineStrategy = Log as error
+```
 
 ####numMaxRetries
 
@@ -317,54 +344,58 @@ Do ensure you have a record of that event somewhere.
 
 ####Creating a Java Instance, an Example
 
-    FailureConfig failureConfig = new FailureConfig(10, 1000000, new SidelineStrategy() {
-            @Override
-            public void sideline(TransactionEvent txEvent) {
-                log.error(txEvent.toString());
-            }
-        });
+```java
+FailureConfig failureConfig = new FailureConfig(10, 1000000, new SidelineStrategy() {
+        @Override
+        public void sideline(TransactionEvent txEvent) {
+            log.error(txEvent.toString());
+        }
+    });
+```
         
 ##Complete Spout Example
 
-    MySqlConfig mySqlConfig = new MySqlConfig.Builder("testDatabase")
-                                             .user("testUser")
-                                             .password("testPass")
-                                             .host("localhost")
-                                             .port(3306)
-                                             .serverId(1)
-                                             .binLogFilename("mysql-bin.000017")
-                                             .binLogPosition(4)
-                                             .tables(Sets.newHashSet("ATable", "BTable"))
-                                             .build();
+```java
+MySqlConfig mySqlConfig = new MySqlConfig.Builder("testDatabase")
+                                         .user("testUser")
+                                         .password("testPass")
+                                         .host("localhost")
+                                         .port(3306)
+                                         .serverId(1)
+                                         .binLogFilename("mysql-bin.000017")
+                                         .binLogPosition(4)
+                                         .tables(Sets.newHashSet("ATable", "BTable"))
+                                         .build();
 
-    ZkBinLogStateConfig zkBinLogStateConfig = new ZkBinLogStateConfig.Builder("my-spout")
-                                                                     .servers(Lists.newArrayList("localhost"))
-                                                                     .port(2181)
-                                                                     .root("mysql-binlog-spout")
-                                                                     .ignoreZkBinLogPosition(false)
-                                                                     .sessionTimeOutInMs(100)
-                                                                     .retryTimes(5)
-                                                                     .connectionTimeOutInMs(100)
-                                                                     .updateRate(1000)
-                                                                     .build();
+ZkBinLogStateConfig zkBinLogStateConfig = new ZkBinLogStateConfig.Builder("my-spout")
+                                                                 .servers(Lists.newArrayList("localhost"))
+                                                                 .port(2181)
+                                                                 .root("mysql-binlog-spout")
+                                                                 .ignoreZkBinLogPosition(false)
+                                                                 .sessionTimeOutInMs(100)
+                                                                 .retryTimes(5)
+                                                                 .connectionTimeOutInMs(100)
+                                                                 .updateRate(1000)
+                                                                 .build();
 
-    FailureConfig failureConfig = new FailureConfig(10, 1000000, new SidelineStrategy() {
-                    @Override
-                    public void sideline(TransactionEvent txEvent) {
-                        log.error(txEvent.toString());
-                    }
-                });
+FailureConfig failureConfig = new FailureConfig(10, 1000000, new SidelineStrategy() {
+                @Override
+                public void sideline(TransactionEvent txEvent) {
+                    log.error(txEvent.toString());
+                }
+            });
 
 
-    MySqlSpoutConfig spoutConfig = new MySqlSpoutConfig(mySqlConfig, zkBinLogStateConfig, failureConfig);
-    MySqlBinLogSpout mySqlBinLogSpout = new MySqlBinLogSpout(spoutConfig);
-    
-    TopologyBuilder topologyBuilder = new TopologyBuilder();
-    topologyBuilder.setSpout("mysqlspout", mySqlBinLogSpout);
-    //Add Bolts
-    
-    Config conf = new Config();
-    StormSubmitter.submitTopology("mysqlSpoutTest", conf, topologyBuilder.createTopology());
+MySqlSpoutConfig spoutConfig = new MySqlSpoutConfig(mySqlConfig, zkBinLogStateConfig, failureConfig);
+MySqlBinLogSpout mySqlBinLogSpout = new MySqlBinLogSpout(spoutConfig);
+
+TopologyBuilder topologyBuilder = new TopologyBuilder();
+topologyBuilder.setSpout("mysqlspout", mySqlBinLogSpout);
+//Add Bolts
+
+Config conf = new Config();
+StormSubmitter.submitTopology("mysqlSpoutTest", conf, topologyBuilder.createTopology());
+```
     
     
 ##Limitations
