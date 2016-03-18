@@ -4,6 +4,7 @@
 #Storm MySql
 
 [![][travis img]][travis]
+[![][sonatype img]][sonatype]
 [![][coverage img]][coverage]
 [![][license img]][license]
 
@@ -397,6 +398,32 @@ Config conf = new Config();
 StormSubmitter.submitTopology("mysqlSpoutTest", conf, topologyBuilder.createTopology());
 ```
     
+## Binaries
+
+Currently storm-mysql has a snapshot release on sonatype.
+A release would be coming shortly.
+
+For using the snapshot:
+
+```xml
+<dependency>
+    <groupId>com.flipkart.storm-mysql</groupId>
+    <artifactId>storm-mysql</artifactId>
+    <version>0.1-SNAPSHOT</version>
+</dependency>
+```
+
+Add the following to the <repositories> section in your pom.xml:
+
+```xml
+<repositories>
+    <repository>
+        <id>sonatype-nexus-snapshots</id>
+        <name>Sonatype Nexus Snapshots</name>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+</repositories>
+```
     
 ##Limitations
 
@@ -443,6 +470,8 @@ Not Supported
 
 [travis]:https://travis-ci.org/flipkart-incubator/storm-mysql
 [travis img]:https://travis-ci.org/flipkart-incubator/storm-mysql.svg?branch=master
+[sonatype]:https://oss.sonatype.org/content/repositories/snapshots/com/flipkart/storm-mysql/storm-mysql
+[sonatype img]:https://img.shields.io/badge/sonatype-0.1--SNAPSHOT-orange.svg
 [coverage]:https://coveralls.io/github/flipkart-incubator/storm-mysql?branch=master
 [coverage img]:https://coveralls.io/repos/github/flipkart-incubator/storm-mysql/badge.svg?branch=master
 [license]:LICENSE
