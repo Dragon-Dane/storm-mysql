@@ -18,17 +18,31 @@ package com.flipkart.storm.mysql;
 
 import java.io.Serializable;
 
+/**
+ * My Sql Spout Complete configuration.
+ */
 public class MySqlSpoutConfig implements Serializable {
 
     private final MySqlConfig           mysqlConfig;
     private final ZkBinLogStateConfig   zkBinLogStateConfig;
     private final FailureConfig         failureConfig;
 
+    /**
+     * Initialize a spout configuration without sidelining.
+     * @param mysqlConfig mysql configuration.
+     * @param zkBinLogStateConfig zookeeper configuration.
+     */
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig) {
         this (mysqlConfig, zkBinLogStateConfig,
               new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED));
     }
 
+    /**
+     * Initialize a spout configuration with sidelining.
+     * @param mysqlConfig mysql configuration.
+     * @param zkBinLogStateConfig zookeeper configuration.
+     * @param failureConfig failure configuration(sidelining)
+     */
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig,
                             FailureConfig failureConfig) {
         this.mysqlConfig = mysqlConfig;

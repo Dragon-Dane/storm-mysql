@@ -16,20 +16,37 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * The MySql Bin Log Position.
+ */
 public class BinLogPosition {
 
-    private final int       binLogPosition;
-    private final String    binLogFileName;
+    private final int           binLogPosition;
+    private final String        binLogFileName;
+    private static final int    SHIFT_LEFT_BITS = 32;
 
+    /**
+     * Instantiate the bin log position.
+     *
+     * @param binLogPosition the position in the bin log
+     * @param binLogFileName the bin log file name
+     */
     public BinLogPosition(int binLogPosition, String binLogFileName) {
         this.binLogPosition = binLogPosition;
         this.binLogFileName = binLogFileName;
     }
 
+    /**
+     * The offset that combines both bin log position and bin log filename.
+     * The most significant 32 bits would be the bin log filename number
+     * and the least significant 32 bits would be the position in the file.
+     *
+     * @return the offset.
+     */
     public long getSCN() {
         int bingLogFileNumericSuffix = extractFileNumber(this.binLogFileName);
         long scn = bingLogFileNumericSuffix;
-        scn <<= 32;
+        scn <<= SHIFT_LEFT_BITS;
         scn |= this.binLogPosition;
         return scn;
     }

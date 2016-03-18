@@ -20,7 +20,10 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
-public class MySqlConfig implements Serializable {
+/**
+ * MySql Configuration for the spout.
+ */
+public final class MySqlConfig implements Serializable {
 
     private final String    user;
     private final String    password;
@@ -31,6 +34,129 @@ public class MySqlConfig implements Serializable {
     private final String    binLogFileName;
     private final String    database;
     private final Set<String> includeTables;
+
+    /**
+     * The Builder class for MySql configuration.
+     */
+    public static class Builder {
+
+        private String  innerUser           = SpoutConstants.DEFAULT_MYSQL_USER;
+        private String  innerPassword       = SpoutConstants.DEFAULT_MYSQL_PASSWORD;
+        private String  innerHost           = SpoutConstants.DEFAULT_MYSQL_HOST;
+        private int     innerPort           = SpoutConstants.DEFAULT_MYSQL_PORT;
+        private int     innerServerId       = SpoutConstants.DEFAULT_MYSQL_SERVERID;
+        private int     innerBinLogPosition = SpoutConstants.DEFAULT_BINLOGPOSITION;
+        private String  innerBinLogFileName = SpoutConstants.DEFAULT_BINLOG_FILENAME;
+        private Set<String>  innerTables    = Collections.emptySet();
+        private final String innerDatabase;
+
+        /**
+         * Set mandatory database name.
+         * .
+         * @param databaseName the name of the database to start replication from.
+         */
+        public Builder(String databaseName) {
+            this.innerDatabase = databaseName;
+        }
+
+        /**
+         * Set user to be used for connecting to the database.
+         *
+         * @param user the user.
+         * @return the builder object to continue building
+         */
+        public Builder user(String user) {
+            this.innerUser = user;
+            return this;
+        }
+
+        /**
+         * Set password to be used for connecting to the database.
+         *
+         * @param password the password.
+         * @return the builder object to continue building
+         */
+        public Builder password(String password) {
+            this.innerPassword = password;
+            return this;
+        }
+
+        /**
+         * Set host to be used for connecting to the database.
+         *
+         * @param host the host.
+         * @return the builder object to continue building
+         */
+        public Builder host(String host) {
+            this.innerHost = host;
+            return this;
+        }
+
+        /**
+         * Set port to be used for connecting to the database.
+         *
+         * @param port the port.
+         * @return the builder object to continue building
+         */
+        public Builder port(int port) {
+            this.innerPort = port;
+            return this;
+        }
+
+        /**
+         * Set serverid to be used for connecting to the database.
+         *
+         * @param serverId the serverId.
+         * @return the builder object to continue building
+         */
+        public Builder serverId(int serverId) {
+            this.innerServerId = serverId;
+            return this;
+        }
+
+        /**
+         * Set bin log position to start replicating from.
+         *
+         * @param position the position.
+         * @return the builder object to continue building
+         */
+        public Builder binLogPosition(int position) {
+            this.innerBinLogPosition = position;
+            return this;
+        }
+
+        /**
+         * Set bin log filename to start replicating from.
+         *
+         * @param fileName the fileName.
+         * @return the builder object to continue building
+         */
+        public Builder binLogFilename(String fileName) {
+            this.innerBinLogFileName = fileName;
+            return this;
+        }
+
+        /**
+         * Include these tables to start replicating from.
+         *
+         * @param tables the table set.
+         * @return the builder object to continue building
+         */
+        public Builder includeTables(Set<String> tables) {
+            this.innerTables = tables;
+            return this;
+        }
+
+        /**
+         * Build the complete object with properties that were set.
+         * @return the mysql config object
+         */
+        public MySqlConfig build() {
+            MySqlConfig mySqlConfig =  new MySqlConfig(this);
+            return mySqlConfig;
+        }
+
+    }
 
     private MySqlConfig(Builder builder) {
         this.user           = builder.innerUser;
@@ -78,68 +204,5 @@ public class MySqlConfig implements Serializable {
 
     public Set<String> getTables() {
         return includeTables;
-    }
-
-    public static class Builder {
-
-        private String  innerUser           = SpoutConstants.DEFAULT_MYSQL_USER;
-        private String  innerPassword       = SpoutConstants.DEFAULT_MYSQL_PASSWORD;
-        private String  innerHost           = SpoutConstants.DEFAULT_MYSQl_HOST;
-        private int     innerPort           = SpoutConstants.DEFAULT_MYSQL_PORT;
-        private int     innerServerId       = SpoutConstants.DEFAULT_MYSQL_SERVERID;
-        private int     innerBinLogPosition = SpoutConstants.DEFAULT_BINLOGPOSITION;
-        private String  innerBinLogFileName = SpoutConstants.DEFAULT_BINLOG_FILENAME;
-        private Set<String>  innerTables    = Collections.emptySet();
-        private final String innerDatabase;
-
-        public Builder(String databaseName) {
-            this.innerDatabase = databaseName;
-        }
-
-        public Builder user(String user) {
-            this.innerUser = user;
-            return this;
-        }
-
-        public Builder password(String password) {
-            this.innerPassword = password;
-            return this;
-        }
-
-        public Builder host(String host) {
-            this.innerHost = host;
-            return this;
-        }
-
-        public Builder port(int port) {
-            this.innerPort = port;
-            return this;
-        }
-
-        public Builder serverId(int serverId) {
-            this.innerServerId = serverId;
-            return this;
-        }
-
-        public Builder binLogPosition(int position) {
-            this.innerBinLogPosition = position;
-            return this;
-        }
-
-        public Builder binLogFilename(String fileName) {
-            this.innerBinLogFileName = fileName;
-            return this;
-        }
-
-        public Builder includeTables(Set<String> tables) {
-            this.innerTables = tables;
-            return this;
-        }
-
-        public MySqlConfig build() {
-            MySqlConfig mySqlConfig =  new MySqlConfig(this);
-            return mySqlConfig;
-        }
-
     }
 }

@@ -18,6 +18,17 @@ package com.flipkart.storm.mysql;
 
 import java.io.Serializable;
 
+/**
+ * The interface for hooking up sideline strategies.
+ */
 public interface SidelineStrategy extends Serializable {
-    public void sideline(TransactionEvent txEvent);
+
+    /**
+     * The sideline function. Once this function returns, the event will be acked.
+     * There is possibility of data loss if events are not sidelined properly before
+     * the function returns.
+     *
+     * @param txEvent the transaction event
+     */
+    void sideline(TransactionEvent txEvent);
 }

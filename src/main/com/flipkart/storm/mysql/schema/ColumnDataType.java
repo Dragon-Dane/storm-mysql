@@ -21,14 +21,24 @@ import com.flipkart.storm.mysql.converters.DateTimeConverter;
 import com.flipkart.storm.mysql.converters.NopConverter;
 import com.flipkart.storm.mysql.converters.StringConverter;
 
+/**
+ * The datatype for the column.
+ */
 public enum ColumnDataType {
 
+    /** The MySql Char Data Type. */
     CHAR,
+    /** The MySql VarChar Data Type. */
     VARCHAR,
+    /** The MySql Text Data Type. */
     TEXT,
+    /** The MySql TinyText Data Type. */
     TINYTEXT,
+    /** The MySql MediumText Data Type. */
     MEDIUMTEXT,
+    /** The MySql LongText Data Type. */
     LONGTEXT,
+    /** The MySql Decimal Data Type. */
     DECIMAL,
 //    SET,
 //    ENUM,
@@ -39,28 +49,55 @@ public enum ColumnDataType {
 //    TINYBLOB,
 //    MEDIUMBLOB,
 //    LONGBLOB,
+    /** The MySql Int Data Type. */
     INT,
+    /** The MySql Integer Data Type. */
     INTEGER,
+    /** The MySql TinyInt Data Type. */
     TINYINT,
+    /** The MySql SmallInt Data Type. */
     SMALLINT,
+    /** The MySql MediumInt Data Type. */
     MEDIUMINT,
+    /** The MySql Float Data Type. */
     FLOAT,
+    /** The MySql Double Data Type. */
     DOUBLE,
+    /** The MySql BigInt Data Type. */
     BIGINT,
+    /** The MySql Date Data Type. */
     DATE,
+    /** The MySql DateTime Data Type. */
     DATETIME,
+    /** The MySql TimeStamp Data Type. */
     TIMESTAMP,
+    /** The MySql Time Data Type. */
     TIME,
+    /** The MySql Year Data Type. */
     YEAR;
 
     private Converter converter;
 
-    private ColumnDataType() { }
+    /**
+     * Prevent initialization.
+     */
+    ColumnDataType() { }
 
+    /**
+     * Get the converted value.
+     *
+     * @param colType the type of the column
+     * @param value the value received from the bin logs
+     * @return the converted object
+     */
     public Object getConvertedValue(ColumnDataType colType, Object value) {
         return this.converter.convert(colType, value);
     }
 
+    /**
+     * Initialize the converter.
+     * @return the column data types
+     */
     public ColumnDataType initialize() {
         this.converter = getConverter(this);
         return this;

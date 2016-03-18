@@ -17,6 +17,16 @@
         <url>https://github.com/flipkart-incubator/storm-mysql</url>
     </scm>
 
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/flipkart-incubator/storm-mysql/issues</url>
+    </issueManagement>
+
+    <organization>
+        <name>Flipkart Internet Pvt. Ltd.</name>
+        <url>http://flipkart.com</url>
+    </organization>
+
     <repositories>
         <repository>
             <id>clojars</id>
@@ -83,6 +93,24 @@
                 <groupId>org.eluder.coveralls</groupId>
                 <artifactId>coveralls-maven-plugin</artifactId>
                 <version>4.1.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.17</version>
+                <configuration>
+                    <failsOnError>true</failsOnError>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <sourceDirectory>src/main</sourceDirectory>

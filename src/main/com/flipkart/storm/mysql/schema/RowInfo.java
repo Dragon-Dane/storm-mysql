@@ -18,10 +18,18 @@ package com.flipkart.storm.mysql.schema;
 
 import java.util.List;
 
+/**
+ * Complete table schema/information of a mysql table row.
+ */
 public class RowInfo {
 
     private final List<ColumnInfo> columnInfoList;
 
+    /**
+     * Row info creation.
+     *
+     * @param columnInfoList the column list
+     */
     public RowInfo(List<ColumnInfo> columnInfoList) {
         this.columnInfoList = columnInfoList;
     }

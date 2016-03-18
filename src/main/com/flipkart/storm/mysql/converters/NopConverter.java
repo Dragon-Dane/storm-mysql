@@ -18,7 +18,11 @@ package com.flipkart.storm.mysql.converters;
 
 import com.flipkart.storm.mysql.schema.ColumnDataType;
 
+/**
+ * Bin log event to Nop Converter. Does not do any conversion.
+ */
 public enum NopConverter implements Converter {
+    /** Ensures a singleton instance. */
     INSTANCE;
 
     @Override

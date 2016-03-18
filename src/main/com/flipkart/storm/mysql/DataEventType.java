@@ -16,8 +16,14 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * MySql data event types.
+ */
 public enum DataEventType {
+    /** Insert bin log event. */
     INSERT,
+    /** Update bin log event. */
     UPDATE,
+    /** Delete bin log event. */
     DELETE
 }

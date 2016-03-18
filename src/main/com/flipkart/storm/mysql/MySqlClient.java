@@ -32,16 +32,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Client for connecting to MySql.
+ */
 public class MySqlClient {
 
     private MySqlConnectionFactory connectionFactory;
+    private static final String GET_MYSQL_TABLE_SCHEMA =
+            "SELECT * FROM information_schema.columns WHERE table_schema = ? and table_name = ?";
 
+    /**
+     * Instantiate the mysql client with the connection factory.
+     * @param connectionFactory the connection factory
+     */
     public MySqlClient(MySqlConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
+    /**
+     * Determines the database schema for the database.
+     * If no tables are provided all tables are considered.
+     * @param databaseName the database name
+     * @param tableNames the table name
+     * @return Complete schema for the database
+     * @throws SQLException
+     */
     public DatabaseInfo getDatabaseSchema(String databaseName, Set<String> tableNames) throws SQLException {
-        if (tableNames.size() == 0) tableNames = getAllTables();
+        if (tableNames.size() == 0) {
+            tableNames = getAllTables();
+        }
         Map<String, TableInfo> tableSchemas = new HashMap<String, TableInfo>();
         for (String tableName : tableNames) {
             RowInfo rowInfo = new RowInfo(getColumnInfo(databaseName, tableName));
@@ -51,6 +70,11 @@ public class MySqlClient {
         return new DatabaseInfo(databaseName, tableSchemas);
     }
 
+    /**
+     * Get current bin log details from MySql.
+     * @return bin log position
+     * @throws SQLException
+     */
     public BinLogPosition getBinLogDetails() throws SQLException {
         ResultSet resultSet = connectionFactory.getConnection().createStatement().executeQuery("SHOW MASTER STATUS");
         resultSet.next();
@@ -59,6 +83,9 @@ public class MySqlClient {
         return binLogPosition;
     }
 
+    /**
+     * Release the connection factory.
+     */
     public void close() {
         connectionFactory.cleanup();
         connectionFactory = null;
@@ -66,12 +93,13 @@ public class MySqlClient {
 
     private List<ColumnInfo> getColumnInfo(String databaseName, String tableName) throws SQLException {
         List<ColumnInfo> columnInfoList = new ArrayList<ColumnInfo>();
-        PreparedStatement columnDetailsStatement = connectionFactory.getConnection().prepareStatement("SELECT * FROM information_schema.columns WHERE table_schema = ? and table_name = ?");
+        PreparedStatement columnDetailsStatement = connectionFactory.getConnection()
+                                                                    .prepareStatement(GET_MYSQL_TABLE_SCHEMA);
         columnDetailsStatement.setString(1, databaseName);
         columnDetailsStatement.setString(2, tableName);
         ResultSet resultSet = columnDetailsStatement.executeQuery();
 
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             String colName    = resultSet.getString("COLUMN_NAME");
             String colType    = resultSet.getString("DATA_TYPE");
             int colPos        = resultSet.getInt("ORDINAL_POSITION") - 1;

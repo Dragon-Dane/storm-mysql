@@ -25,19 +25,36 @@ import java.sql.SQLException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Wrapper over open replicator. Takes care of retrieving the MySql schema as well.
+ */
 public class OpenReplicatorManager {
 
+    /** The logger. */
     public static final Logger LOGGER = LoggerFactory.getLogger(OpenReplicatorManager.class);
 
     private OpenReplicator      openReplicator;
     private final ZkClient      zkClient;
     private final MySqlClient   mySqlClient;
 
+    /**
+     * Provide Open Replicator Manager with clients.
+     *
+     * @param mysqlClient the mysql client
+     * @param client the zookeeper client
+     */
     public OpenReplicatorManager(MySqlClient mysqlClient, ZkClient client) {
         this.zkClient = client;
         this.mySqlClient = mysqlClient;
     }
 
+    /**
+     * Initialize while providing user spout configurations and internal transaction buffer.
+     * @param mySqlConfig Mysql user defined configurations.
+     * @param zkConfig Zookeeper configurations.
+     * @param txEventQueue the internal buffer for transaction events.
+     * @return the start bin log position.
+     */
     public BinLogPosition initialize(MySqlConfig mySqlConfig,
                                     ZkBinLogStateConfig zkConfig,
                                     LinkedBlockingQueue<TransactionEvent> txEventQueue) {
@@ -54,6 +71,9 @@ public class OpenReplicatorManager {
         return binLogPosition;
     }
 
+    /**
+     * Start the replication.
+     */
     public void startReplication() {
         try {
             this.openReplicator.start();
@@ -64,37 +84,43 @@ public class OpenReplicatorManager {
 
     private BinLogPosition getBinLogPositionToStartFrom(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkConfig) {
         try {
-            if (zkConfig.isZkIgnoreBinLogPosition()) {
-                LOGGER.info("Ignoring Zookeeper state because ignoreZkBingLogPosition set to true...");
-                BinLogPosition binLogPosition = getBinLogPosition(mysqlConfig);
-                LOGGER.info("Starting from BinLogFile {} and BinLogPosition {}", binLogPosition.getBinLogFileName(), binLogPosition.getBinLogPosition());
-                return binLogPosition;
-            } else {
-                OffsetInfo offsetInfo = getDetailsFromZK(zkConfig.getZkScnCommitPath());
-                if (offsetInfo == null) {
-                    LOGGER.info("No Information of offsets found in zookeeper, trying from MySQL...");
+                if (zkConfig.isZkIgnoreBinLogPosition()) {
+                    LOGGER.info("Ignoring Zookeeper state because ignoreZkBingLogPosition set to true...");
                     BinLogPosition binLogPosition = getBinLogPosition(mysqlConfig);
-                    LOGGER.info("Starting from BinLogFile {} and BinLogPosition {}", binLogPosition.getBinLogFileName(), binLogPosition.getBinLogPosition());
+                    LOGGER.info("Starting from BinLogFile {} and BinLogPosition {}",
+                            binLogPosition.getBinLogFileName(), binLogPosition.getBinLogPosition());
                     return binLogPosition;
                 } else {
-                    LOGGER.info("Offset Information found in Zookeeper. Starting from BinLogFile {} BinLogPosition {}", offsetInfo.getBinLogFileName(), offsetInfo.getBinLogPosition());
-                    return new BinLogPosition(offsetInfo.getBinLogPosition(), offsetInfo.getBinLogFileName());
+                    OffsetInfo offsetInfo = getDetailsFromZK(zkConfig.getZkScnCommitPath());
+                    if (offsetInfo == null) {
+                        LOGGER.info("No Information of offsets found in zookeeper, trying from MySQL...");
+                        BinLogPosition binLogPosition = getBinLogPosition(mysqlConfig);
+                        LOGGER.info("Starting from BinLogFile {} and BinLogPosition {}",
+                                binLogPosition.getBinLogFileName(), binLogPosition.getBinLogPosition());
+                        return binLogPosition;
+                    } else {
+                        LOGGER.info("Offset Information found in Zookeeper. Starting from BinLogFile {} BinLogPosition {}",
+                                offsetInfo.getBinLogFileName(), offsetInfo.getBinLogPosition());
+                        return new BinLogPosition(offsetInfo.getBinLogPosition(), offsetInfo.getBinLogFileName());
+                    }
                 }
+            } catch (Exception ex) {
+                    throw new RuntimeException("Could not get starting offset to read from", ex);
             }
-        } catch (Exception ex) {
-                throw new RuntimeException("Could not get starting offset to read from", ex);
-        }
     }
 
     private BinLogPosition getBinLogPosition(MySqlConfig mysqlConfig) throws SQLException {
         if (Strings.isNullOrEmpty(mysqlConfig.getBinLogFileName())) {
             return this.mySqlClient.getBinLogDetails();
-        } else return new BinLogPosition(mysqlConfig.getBinLogPosition(), mysqlConfig.getBinLogFileName());
+        } else {
+            return new BinLogPosition(mysqlConfig.getBinLogPosition(), mysqlConfig.getBinLogFileName());
+        }
     }
 
     private DatabaseInfo getSchema(MySqlConfig mySqlConfig) {
         try {
-            DatabaseInfo dbSchemaInfo = this.mySqlClient.getDatabaseSchema(mySqlConfig.getDatabase(), mySqlConfig.getTables());
+            DatabaseInfo dbSchemaInfo = this.mySqlClient.getDatabaseSchema(mySqlConfig.getDatabase(),
+                                                                           mySqlConfig.getTables());
             LOGGER.info("Table List to propagate events from {}", dbSchemaInfo.getAllTableNames());
             LOGGER.info("Complete Schema Recognize : {}", dbSchemaInfo);
             return dbSchemaInfo;
@@ -108,13 +134,16 @@ public class OpenReplicatorManager {
         OffsetInfo zkOffsetInfo = null;
         try {
             zkOffsetInfo = zkClient.read(path);
-            LOGGER.info("Read information from: Path {} Offset Info {}", path, zkOffsetInfo );
+            LOGGER.info("Read information from: Path {} Offset Info {}", path, zkOffsetInfo);
         } catch (Throwable e) {
             LOGGER.warn("Error reading from ZkNode: {} {}", path, e);
         }
         return zkOffsetInfo;
     }
 
+    /**
+     * Stop replication.
+     */
     public void close() {
         try {
             openReplicator.stop(1, TimeUnit.SECONDS);

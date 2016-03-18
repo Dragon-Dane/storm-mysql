@@ -18,6 +18,10 @@ package com.flipkart.storm.mysql.converters;
 
 import com.flipkart.storm.mysql.schema.ColumnDataType;
 
+/**
+ * The converter interface that converts bin log events to appropriate types.
+ */
 public interface Converter {
-    public Object convert(ColumnDataType columnDataType, Object value);
+    /** The converter. */
+    Object convert(ColumnDataType columnDataType, Object value);
 }

@@ -18,14 +18,20 @@ package com.flipkart.storm.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * The mysql connection factory responsible for keeping all connections.
+ */
 public class MySqlConnectionFactory {
 
     private HikariDataSource dataSource;
 
+    /**
+     * Instantiate the connection factory with the mysql configuration.
+     * @param sqlConfig
+     */
     public MySqlConnectionFactory(MySqlConfig sqlConfig) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(getJdbcUrl(sqlConfig));
@@ -34,6 +40,11 @@ public class MySqlConnectionFactory {
         this.dataSource = new HikariDataSource(config);
     }
 
+    /**
+     * Retrieve a connection.
+     *
+     * @return a mysql connection object.
+     */
     public Connection getConnection() {
         try {
             return this.dataSource.getConnection();
@@ -42,6 +53,9 @@ public class MySqlConnectionFactory {
         }
     }
 
+    /**
+     * Clean up the connection factory.
+     */
     public void cleanup() {
         if (dataSource != null) {
             dataSource.close();

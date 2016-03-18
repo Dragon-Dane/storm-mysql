@@ -19,16 +19,30 @@ package com.flipkart.storm.mysql.schema;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Complete database schema/information.
+ */
 public class DatabaseInfo {
 
     private String                  databaseName;
     private Map<String, TableInfo>  tableInfoMap;
 
+    /**
+     * Database Schema object creation.
+     *
+     * @param databaseName the database name
+     * @param tableInfoMap the table map
+     */
     public DatabaseInfo(String databaseName, Map<String, TableInfo> tableInfoMap) {
         this.databaseName = databaseName;
         this.tableInfoMap = tableInfoMap;
     }
 
+    /**
+     * Get the complete information about the table.
+     * @param tableName the name of the table.
+     * @return
+     */
     public TableInfo getTableInfo(String tableName) {
         return this.tableInfoMap.get(tableName);
     }

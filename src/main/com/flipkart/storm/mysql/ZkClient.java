@@ -27,12 +27,25 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.Charset;
 import java.util.List;
 
+/**
+ * A wrapper around connecting to Zookeeper.
+ */
 public class ZkClient {
 
     private static final Logger LOGGER              = LoggerFactory.getLogger(ZkClient.class);
     private static final String DEFAULT_CHARSET     = "UTF-8";
     private CuratorFramework client;
 
+    /**
+     * Instantiating the zookeeper client.
+     *
+     * @param servers list of servers to connect to
+     * @param port the port on which to connect
+     * @param sessionTimeoutMs the session timeout
+     * @param connectionTimeoutMs the connection timeout
+     * @param retryTimes number of retries to zookeeper
+     * @param sleepMsBetweenRetries time to sleep between retries
+     */
     public ZkClient(List<String> servers, int port,
                     int sessionTimeoutMs, int connectionTimeoutMs,
                     int retryTimes, int sleepMsBetweenRetries) {
@@ -48,12 +61,26 @@ public class ZkClient {
             }
     }
 
+    /**
+     * Write at zookeeper path.
+     *
+     * @param path zkNode Path at which to write to payload
+     * @param payload the actual data
+     * @param <T> payload type
+     */
     public <T> void write(String path, T payload) {
         String data = JSONValue.toJSONString(payload);
         LOGGER.debug("Writing to Zookeeper Path {} Payload {}", path, data);
         writeInternal(path, data.getBytes(Charset.forName(DEFAULT_CHARSET)));
     }
 
+    /**
+     * Read from zookeeper path.
+     *
+     * @param path zkNode Path at which to read from
+     * @param <T> type of data
+     * @return data object that was read
+     */
     public <T> T read(String path) {
         try {
             byte[] bytes = readInternal(path);
@@ -66,6 +93,9 @@ public class ZkClient {
         }
     }
 
+    /**
+     * Close the zookeeper client.
+     */
     public void close() {
         client.close();
         client = null;

@@ -16,6 +16,9 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * Information about bin log offsets stored in zookeeper.
+ */
 public class OffsetInfo {
 
     private final long      scn;
@@ -25,7 +28,15 @@ public class OffsetInfo {
     private final int       binLogPosition;
     private final String    binLogFileName;
 
-
+    /**
+     * Initialization of offset info.
+     * @param scn the source control number, a combination of bin log filename and position.
+     * @param topologyName the name of the storm topology.
+     * @param topologyInstanceId the topology instance id.
+     * @param databaseName the database name.
+     * @param binLogPosition the bin log position.
+     * @param binLogFileName the bin log filename.
+     */
     public OffsetInfo(long scn,
                       String topologyName,
                       String topologyInstanceId,

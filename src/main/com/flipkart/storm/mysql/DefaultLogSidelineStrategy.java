@@ -19,11 +19,20 @@ package com.flipkart.storm.mysql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The default log sideline strategy.
+ */
 public class DefaultLogSidelineStrategy implements SidelineStrategy {
 
+    /** The Logger. */
     public static final Logger LOGGER = LoggerFactory.getLogger(DefaultLogSidelineStrategy.class);
 
+    /**
+     * Log the message as an error.
+     *
+     * @param transactionEvent the transaction event
+     */
     public void sideline(TransactionEvent transactionEvent) {
-        LOGGER.error("Sideline : {}" , transactionEvent.toString());
+        LOGGER.error("Sideline : {}", transactionEvent.toString());
     }
 }

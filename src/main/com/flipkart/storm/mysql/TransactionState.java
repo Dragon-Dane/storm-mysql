@@ -16,9 +16,21 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * The transaction state for the bin log events.
+ */
 public enum TransactionState {
 
+    /**
+     * The default transaction state.
+     */
     NONE,
+    /**
+     * The start transaction state. Mostly should be assigned on the bin log QUERY_EVENT.
+     */
     STARTED,
+    /**
+     * The end transaction state. Should be assigned on the XID_EVENT.
+     */
     END
 }

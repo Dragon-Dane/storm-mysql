@@ -16,11 +16,20 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * The transaction event with the retry count.
+ */
 public class RetryTransactionEvent {
 
     private final TransactionEvent  txEvent;
     private final int               numRetries;
 
+    /**
+     * Instatiate a transaction event with the number of retries already done.
+     *
+     * @param txEvent the transaction event
+     * @param numRetries the num retries
+     */
     public RetryTransactionEvent(TransactionEvent txEvent, int numRetries) {
         this.txEvent    = txEvent;
         this.numRetries = numRetries;

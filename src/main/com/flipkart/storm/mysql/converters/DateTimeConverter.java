@@ -23,7 +23,11 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+/**
+ * Bin log event to DateTime Converter.
+ */
 public enum DateTimeConverter implements Converter {
+    /** Ensures a singleton instance. */
     INSTANCE;
 
     @Override

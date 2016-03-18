@@ -16,11 +16,20 @@
 
 package com.flipkart.storm.mysql.schema;
 
+/**
+ * Complete table schema/information of a mysql table.
+ */
 public class TableInfo {
 
     private final String    tableName;
     private final RowInfo   rowInfo;
 
+    /**
+     * Table info creation.
+     *
+     * @param tableName The table name
+     * @param rowInfo Complete row information
+     */
     public TableInfo(String tableName, RowInfo rowInfo) {
         this.tableName  = tableName;
         this.rowInfo    = rowInfo;

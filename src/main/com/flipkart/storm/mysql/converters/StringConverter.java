@@ -18,14 +18,18 @@ package com.flipkart.storm.mysql.converters;
 
 import com.flipkart.storm.mysql.schema.ColumnDataType;
 
+/**
+ * Bin log event to String Converter.
+ */
 public enum StringConverter implements Converter {
+    /** Ensures a singleton instance. */
     INSTANCE;
 
     @Override
     public Object convert(ColumnDataType columnDataType, Object value) {
-        if ( value instanceof String ) {
+        if (value instanceof String) {
             return value;
         }
-        return new String((byte[])value);
+        return new String((byte[]) value);
     }
 }

@@ -28,7 +28,6 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
@@ -37,10 +36,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+/**
+ * The MySql Bin Log Spout that emits events from mysql bin logs as a stream.
+ */
 public class MySqlBinLogSpout extends BaseRichSpout {
 
-    public static final Logger  LOGGER                      = LoggerFactory.getLogger(MySqlBinLogSpout.class);
-    private static final ObjectMapper mapper                = new ObjectMapper();
+    /** The Logger. */
+    public static final Logger  LOGGER                     = LoggerFactory.getLogger(MySqlBinLogSpout.class);
+
+    private static final ObjectMapper MAPPER               = new ObjectMapper();
     private long                msgAckCount                = 0;
     private long                msgSidelineCount           = 0;
     private long                msgFailedCount             = 0;
@@ -57,22 +61,26 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private SpoutOutputCollector    collector;
     private long                    zkLastUpdateMs;
 
-    private SortedMap<Long, Long>                   failureMessages             = new TreeMap<Long, Long>();
-    private LinkedBlockingQueue<TransactionEvent>   txQueue                     = new LinkedBlockingQueue<TransactionEvent>();
-    private SortedMap<Long, RetryTransactionEvent>  pendingMessagesToBeAcked    = new TreeMap<Long, RetryTransactionEvent>();
+    private SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
+    private LinkedBlockingQueue<TransactionEvent>   txQueue                   = new LinkedBlockingQueue<TransactionEvent>();
+    private SortedMap<Long, RetryTransactionEvent>  pendingMessagesToBeAcked  = new TreeMap<Long, RetryTransactionEvent>();
 
     private AssignableMetric failureCountMetric;
     private AssignableMetric sidelineCountMetric;
     private AssignableMetric successCountMetric;
     private ReducedMetric    txEventProcessTime;
 
-
+    /**
+     * Initialize the MySql Spout.
+     *
+     * @param spoutConfig MySql + Zookeeper Configuration
+     */
     public MySqlBinLogSpout(MySqlSpoutConfig spoutConfig) {
         this.spoutConfig = spoutConfig;
     }
 
     @Override
-    public void open(Map conf, final TopologyContext context, final SpoutOutputCollector collector) {
+    public void open(Map conf, final TopologyContext context, final SpoutOutputCollector spoutOutputCollector) {
 
         Preconditions.checkNotNull(this.spoutConfig.getZkBinLogStateConfig(),
                 "Zookeeper Config cannot be null");
@@ -80,7 +88,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         Preconditions.checkNotNull(this.spoutConfig.getMysqlConfig(),
                 "Mysql Config cannot be null");
 
-        this.collector          = collector;
+        this.collector          = spoutOutputCollector;
         this.topologyInstanceId = context.getStormId();
         this.topologyName       = conf.get(Config.TOPOLOGY_NAME).toString();
 
@@ -171,8 +179,9 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         if (txRetrEvent != null) {
             TransactionEvent txEvent = txRetrEvent.getTxEvent();
             this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
-                String txJson = mapper.writeValueAsString(txEvent);
-                BinLogPosition binLogPosition = new BinLogPosition(txEvent.getStartBinLogPosition(), txEvent.getStartBinLogFileName());
+                String txJson = MAPPER.writeValueAsString(txEvent);
+                BinLogPosition binLogPosition = new BinLogPosition(txEvent.getStartBinLogPosition(),
+                                                                   txEvent.getStartBinLogFileName());
             long scn = binLogPosition.getSCN();
             this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
             this.lastEmittedBeginTxPosition = binLogPosition;
@@ -217,16 +226,25 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         commit();
     }
 
+    /**
+     * Fields emitted by the spout.
+     *
+     * @param declarer the fields declarer
+     */
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("databaseName", "txEvent"));
     }
 
+    /**
+     * Updates zookeeper with the bin log position/offset.
+     */
     public void commit() {
         long offset = (pendingMessagesToBeAcked.isEmpty()) ? this.lastEmittedBeginTxPosition.getSCN() :
                                                              pendingMessagesToBeAcked.firstKey();
         if (currentCommittedOffsetInZk != offset) {
-            LOGGER.debug("Updating ZK with offset {} for topology: {} with Id: {}", offset, this.topologyName, this.topologyInstanceId);
+            LOGGER.debug("Updating ZK with offset {} for topology: {} with Id: {}",
+                                                    offset, this.topologyName, this.topologyInstanceId);
             OffsetInfo offsetInfo = null;
             if (pendingMessagesToBeAcked.isEmpty()) {
                 offsetInfo = new OffsetInfo(offset,
@@ -248,7 +266,8 @@ public class MySqlBinLogSpout extends BaseRichSpout {
             zkClient.write(this.spoutConfig.getZkBinLogStateConfig().getZkScnCommitPath(), offsetInfo);
             zkLastUpdateMs = System.currentTimeMillis();
             currentCommittedOffsetInZk = offset;
-            LOGGER.debug("Update Complete in ZK with offset {} for topology: {} with Id: {}", offset, topologyName, topologyInstanceId);
+            LOGGER.debug("Update Complete in ZK with offset {} for topology: {} with Id: {}",
+                                                            offset, topologyName, topologyInstanceId);
         } else {
             LOGGER.debug("No update in ZK for offset {}", offset);
         }
@@ -260,10 +279,14 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         this.sidelineCountMetric    = new AssignableMetric(this.msgSidelineCount);
         this.txEventProcessTime     = new ReducedMetric(new MeanReducer());
 
-        context.registerMetric(SpoutConstants.METRIC_FAILURECOUNT, this.failureCountMetric, SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_SUCCESSCOUNT, this.successCountMetric, SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_SIDELINECOUNT, this.sidelineCountMetric, SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_TXPROCESSTIME, this.txEventProcessTime, SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+        context.registerMetric(SpoutConstants.METRIC_FAILURECOUNT, this.failureCountMetric,
+                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+        context.registerMetric(SpoutConstants.METRIC_SUCCESSCOUNT, this.successCountMetric,
+                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+        context.registerMetric(SpoutConstants.METRIC_SIDELINECOUNT, this.sidelineCountMetric,
+                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+        context.registerMetric(SpoutConstants.METRIC_TXPROCESSTIME, this.txEventProcessTime,
+                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
     }
 }
 

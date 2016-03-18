@@ -16,12 +16,17 @@
 
 package com.flipkart.storm.mysql;
 
+/**
+ * The central transaction builder.
+ */
 public enum CentralTxEventBuilder {
+    /** Ensures a singleton instance. */
     INSTANCE;
 
-    private final TransactionEvent.builder txBuilder = new TransactionEvent.builder();
+    private final TransactionEvent.Builder txBuilder = new TransactionEvent.Builder();
 
-    public TransactionEvent.builder getBuilder(){
+    /* Retrieve the builder. */
+    public TransactionEvent.Builder getBuilder() {
         return txBuilder;
     }
 }

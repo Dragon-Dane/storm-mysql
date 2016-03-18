@@ -18,16 +18,32 @@ package com.flipkart.storm.mysql;
 
 import java.io.Serializable;
 
+/**
+ * Failure Configuration for messages being failed by the bolt.
+ */
 public class FailureConfig implements Serializable {
 
     private final int               numMaxRetries;
     private final long              numMaxTotalFailAllowed;
     private final SidelineStrategy  sidelineStrategy;
 
+    /**
+     * Initialize failure config with default log sideling strategy.
+     *
+     * @param numMaxRetries the max retries allowed before messages are sidelined.
+     * @param numMaxTotalFailAllowed total max fail allowed at one point in time.
+     */
     public FailureConfig(int numMaxRetries, long numMaxTotalFailAllowed) {
         this (numMaxRetries, numMaxTotalFailAllowed, new DefaultLogSidelineStrategy());
     }
 
+    /**
+     * Initialize failure config with sideline strategy.
+     *
+     * @param numMaxRetries the max retries allowed before messages are sidelined.
+     * @param numMaxTotalFailAllowed total max fail allowed at one point in time.
+     * @param sidelineStrategy after max retries strategy to use to remove the message from the stream.
+     */
     public FailureConfig(int numMaxRetries, long numMaxTotalFailAllowed, SidelineStrategy sidelineStrategy) {
         this.numMaxRetries              = numMaxRetries;
         this.numMaxTotalFailAllowed     = numMaxTotalFailAllowed;

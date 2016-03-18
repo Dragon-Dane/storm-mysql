@@ -19,6 +19,9 @@ package com.flipkart.storm.mysql;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The actual data event in the bin logs.
+ */
 public class DataEvent {
 
     private final String                    tableName;
@@ -26,6 +29,14 @@ public class DataEvent {
     private final List<Map<String, Object>> oldData;
     private final List<Map<String, Object>> data;
 
+    /**
+     * Create the data event.
+     *
+     * @param tableName the name of the table for which the bin log event was raised
+     * @param dataEventType the event type
+     * @param oldData this is the data that was edited, only applicable in the case of updates.
+     * @param data data that was changed.
+     */
     public DataEvent(String tableName,
                      DataEventType dataEventType,
                      List<Map<String, Object>> oldData,

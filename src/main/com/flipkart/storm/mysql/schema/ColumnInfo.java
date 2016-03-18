@@ -16,18 +16,32 @@
 
 package com.flipkart.storm.mysql.schema;
 
+/**
+ * Complete column schema/information of a mysql table.
+ */
 public class ColumnInfo {
 
     private final String            name;
     private final int               position;
     private final ColumnDataType    columnDataType;
 
+    /**
+     * Column Info creation.
+     *
+     * @param name Name of the column.
+     * @param position Position of the column.
+     * @param mysqlType Type of the column.
+     */
     public ColumnInfo(String name, int position, String mysqlType) {
         this.name = name;
         this.position = position;
         this.columnDataType = ColumnDataType.valueOf(mysqlType.toUpperCase()).initialize();
     }
 
+    /**
+     * Get the name of the column.
+     * @return
+     */
     public String getName() {
         return name;
     }
