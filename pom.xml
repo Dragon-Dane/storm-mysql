@@ -29,9 +29,9 @@
 
     <repositories>
         <repository>
-            <id>clojars</id>
-            <name>Clojars repository</name>
-            <url>https://clojars.org/repo</url>
+            <id>sonatype-stage</id>
+            <name>Sonatype Nexus Staging</name>
+            <url>https://oss.sonatype.org/content/repositories/comflipkart-1013</url>
         </repository>
     </repositories>
 
