@@ -17,7 +17,6 @@
 package com.flipkart.storm.mysql;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 /**
