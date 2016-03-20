@@ -26,7 +26,7 @@ import java.util.List;
 public final class ZkBinLogStateConfig implements Serializable {
 
     private final List<String>  zkServers;
-    private final int           zkPort;
+    private final Integer       zkPort;
     private final String        zkRoot;
     private final String        zkSpoutId;
     private final String        zkScnCommitPath;
@@ -44,8 +44,8 @@ public final class ZkBinLogStateConfig implements Serializable {
 
         private final String innerZkSpoutId;
 
-        private List<String>    innerZkServers                  = Collections.singletonList("localhost");
-        private int             innerZkPort                     = SpoutConstants.DEFAULT_ZKPORT;
+        private List<String>    innerZkServers                  = null;
+        private Integer         innerZkPort                     = null;
         private String          innerZkRoot                     = SpoutConstants.DEFAULT_ZKROOT;
         private int             innerZkScnUpdateRateInMs        = SpoutConstants.DEFAULT_ZK_UPDATE_RATE_MS;
         private Integer         innerZkSessionTimeoutInMs       = null;
@@ -195,7 +195,7 @@ public final class ZkBinLogStateConfig implements Serializable {
         return zkServers;
     }
 
-    public int getZkPort() {
+    public Integer getZkPort() {
         return zkPort;
     }
 
