@@ -63,9 +63,13 @@ public class MySqlClient {
         }
         Map<String, TableInfo> tableSchemas = new HashMap<String, TableInfo>();
         for (String tableName : tableNames) {
-            RowInfo rowInfo = new RowInfo(getColumnInfo(databaseName, tableName));
-            TableInfo tableInfo = new TableInfo(tableName, rowInfo);
-            tableSchemas.put(tableName, tableInfo);
+            //Converting to lowercase cause open replicator seems to return
+            //all bin log events with tables in lowercase. The comparison for
+            //filtering events works correctly then.
+            String lowerCaseTableName = tableName.toLowerCase();
+            RowInfo rowInfo = new RowInfo(getColumnInfo(databaseName, lowerCaseTableName));
+            TableInfo tableInfo = new TableInfo(lowerCaseTableName, rowInfo);
+            tableSchemas.put(lowerCaseTableName, tableInfo);
         }
         return new DatabaseInfo(databaseName, tableSchemas);
     }
