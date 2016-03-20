@@ -24,10 +24,17 @@ import java.util.Map;
  */
 public class DataEvent {
 
-    private final String                    tableName;
-    private final DataEventType             dataEventType;
-    private final List<Map<String, Object>> oldData;
-    private final List<Map<String, Object>> data;
+    private String                    tableName;
+    private DataEventType             dataEventType;
+    private List<Map<String, Object>> oldData;
+    private List<Map<String, Object>> data;
+
+    /**
+     * For ObjectMapper to instantiate object.
+     */
+    @Deprecated
+    DataEvent() {
+    }
 
     /**
      * Create the data event.

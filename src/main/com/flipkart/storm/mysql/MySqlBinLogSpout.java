@@ -176,31 +176,33 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         }
 
         try {
-        if (txRetrEvent != null) {
-            TransactionEvent txEvent = txRetrEvent.getTxEvent();
-            this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
-                String txJson = MAPPER.writeValueAsString(txEvent);
-                BinLogPosition binLogPosition = new BinLogPosition(txEvent.getStartBinLogPosition(),
-                                                                   txEvent.getStartBinLogFileName());
-            long scn = binLogPosition.getSCN();
-            this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
-            this.lastEmittedBeginTxPosition = binLogPosition;
-            collector.emit(new Values(txEvent.getDatabaseName(), txJson), scn);
-        }
+            if (txRetrEvent != null) {
+                TransactionEvent txEvent = txRetrEvent.getTxEvent();
+                this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
+                    String txJson = MAPPER.writeValueAsString(txEvent);
+                    BinLogPosition binLogPosition = new BinLogPosition(txEvent.getBinLogPosition(),
+                                                                       txEvent.getBinLogFileName());
+                long scn = binLogPosition.getSCN();
+                this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
+                this.lastEmittedBeginTxPosition = binLogPosition;
+                collector.emit(new Values(txEvent.getDatabaseName(), txJson), scn);
+            }
 
-        long diffWithNow = System.currentTimeMillis() - zkLastUpdateMs;
-        if (diffWithNow > this.spoutConfig.getZkBinLogStateConfig().getZkScnUpdateRateInMs() || diffWithNow < 0) {
-            commit();
-        }
+            long diffWithNow = System.currentTimeMillis() - zkLastUpdateMs;
+            if (diffWithNow > this.spoutConfig.getZkBinLogStateConfig().getZkScnUpdateRateInMs() || diffWithNow < 0) {
+                    commit();
+            }
+        } catch (ZkException ex) {
+            LOGGER.error("Error occurred in Zookeeper..{}", ex);
         } catch (Exception ex) {
-            LOGGER.error("Error occurred in processing event {}:", txRetrEvent);
+            LOGGER.error("Error occurred in processing event {}, exception {}", txRetrEvent, ex.getStackTrace());
         }
 
     }
 
     @Override
     public void ack(Object msgId) {
-        LOGGER.info("Acking For... {}", msgId);
+        LOGGER.debug("Acking For... {}", msgId);
         long scn = (Long) msgId;
         this.pendingMessagesToBeAcked.remove(scn);
         this.failureMessages.remove(scn);
@@ -210,7 +212,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
     @Override
     public void fail(Object msgId) {
-        LOGGER.info("Failing For... {}", msgId);
+        LOGGER.debug("Failing For... {}", msgId);
         int numFailures = this.failureMessages.size();
         if (numFailures >= this.spoutConfig.getFailureConfig().getNumMaxTotalFailAllowed()) {
             throw new RuntimeException("Failure count greater than configured allowed failures...Stopping");
@@ -259,14 +261,15 @@ public class MySqlBinLogSpout extends BaseRichSpout {
                                             this.topologyName,
                                             this.topologyInstanceId,
                                             txEvent.getDatabaseName(),
-                                            txEvent.getStartBinLogPosition(),
-                                            txEvent.getStartBinLogFileName());
+                                            txEvent.getBinLogPosition(),
+                                            txEvent.getBinLogFileName());
             }
 
             zkClient.write(this.spoutConfig.getZkBinLogStateConfig().getZkScnCommitPath(), offsetInfo);
             zkLastUpdateMs = System.currentTimeMillis();
             currentCommittedOffsetInZk = offset;
-            LOGGER.debug("Update Complete in ZK with offset {} for topology: {} with Id: {}",
+            LOGGER.debug("Update Complete in ZK at node {} with offset {} for topology: {} with Id: {}",
+                                                            this.spoutConfig.getZkBinLogStateConfig().getZkScnCommitPath(),
                                                             offset, topologyName, topologyInstanceId);
         } else {
             LOGGER.debug("No update in ZK for offset {}", offset);

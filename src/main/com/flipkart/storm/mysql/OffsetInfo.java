@@ -21,12 +21,19 @@ package com.flipkart.storm.mysql;
  */
 public class OffsetInfo {
 
-    private final long      scn;
-    private final String    topologyName;
-    private final String    topologyInstanceId;
-    private final String    databaseName;
-    private final int       binLogPosition;
-    private final String    binLogFileName;
+    private long      scn;
+    private String    topologyName;
+    private String    topologyInstanceId;
+    private String    databaseName;
+    private int       binLogPosition;
+    private String    binLogFileName;
+
+    /**
+     * For ObjectMapper to instantiate object.
+     */
+    @Deprecated
+    OffsetInfo() {
+    }
 
     /**
      * Initialization of offset info.
@@ -58,5 +65,21 @@ public class OffsetInfo {
 
     public String getBinLogFileName() {
         return binLogFileName;
+    }
+
+    public long getScn() {
+        return scn;
+    }
+
+    public String getTopologyName() {
+        return topologyName;
+    }
+
+    public String getTopologyInstanceId() {
+        return topologyInstanceId;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 }

@@ -16,11 +16,11 @@
 
 package com.flipkart.storm.mysql;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.zookeeper.CreateMode;
-import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +32,9 @@ import java.util.List;
  */
 public class ZkClient {
 
-    private static final Logger LOGGER              = LoggerFactory.getLogger(ZkClient.class);
-    private static final String DEFAULT_CHARSET     = "UTF-8";
+    private static final Logger         LOGGER              = LoggerFactory.getLogger(ZkClient.class);
+    private static final ObjectMapper   MAPPER              = new ObjectMapper();
+    private static final String         DEFAULT_CHARSET     = "UTF-8";
     private CuratorFramework client;
 
     /**
@@ -65,31 +66,40 @@ public class ZkClient {
      * Write at zookeeper path.
      *
      * @param path zkNode Path at which to write to payload
-     * @param payload the actual data
-     * @param <T> payload type
+     * @param offsetInfo the offset info
+     * @throws ZkException
      */
-    public <T> void write(String path, T payload) {
-        String data = JSONValue.toJSONString(payload);
-        LOGGER.debug("Writing to Zookeeper Path {} Payload {}", path, data);
-        writeInternal(path, data.getBytes(Charset.forName(DEFAULT_CHARSET)));
+    public void write(String path, OffsetInfo offsetInfo) throws ZkException {
+        try {
+            String data = MAPPER.writeValueAsString(offsetInfo);
+            LOGGER.info("Writing to Zookeeper Path {} OffsetInfo {}", path, data);
+            writeInternal(path, data.getBytes(Charset.forName(DEFAULT_CHARSET)));
+        } catch (Exception ex) {
+            LOGGER.error("Error writing to Zookeeper..Path {} Payload {}", path, offsetInfo);
+            throw new ZkException("Error writing to Zookeeper..Path: " + path + " OffsetInfo: " + offsetInfo, ex);
+        }
     }
 
     /**
      * Read from zookeeper path.
      *
      * @param path zkNode Path at which to read from
-     * @param <T> type of data
-     * @return data object that was read
+     * @return the offset info
+     * @throws ZkException
      */
-    public <T> T read(String path) {
+   public OffsetInfo read(String path) throws ZkException {
         try {
             byte[] bytes = readInternal(path);
             if (bytes == null) {
                 return null;
             }
-            return (T) JSONValue.parse(new String(bytes, DEFAULT_CHARSET));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            String data = new String(bytes, DEFAULT_CHARSET);
+            LOGGER.info("Reading from Zookeeper Path {} Payload {}", path, data);
+            OffsetInfo offsetInfo = MAPPER.readValue(data, OffsetInfo.class);
+            return offsetInfo;
+        } catch (Exception ex) {
+            LOGGER.error("Error while reading from Zk Path..{} Exception {}", path, ex.getMessage());
+            throw new ZkException("Error reading from Zookeeper..Path: " + path, ex);
         }
     }
 
@@ -101,27 +111,19 @@ public class ZkClient {
         client = null;
     }
 
-    private void writeInternal(String path, byte[] payload) {
-        try {
-            if (client.checkExists().forPath(path) == null) {
-                client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, payload);
-            } else {
-                client.setData().forPath(path, payload);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    private void writeInternal(String path, byte[] payload) throws Exception {
+        if (client.checkExists().forPath(path) == null) {
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, payload);
+        } else {
+            client.setData().forPath(path, payload);
         }
     }
 
-    private byte[] readInternal(String path) {
-        try {
-            if (client.checkExists().forPath(path) != null) {
-                return client.getData().forPath(path);
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    private byte[] readInternal(String path) throws Exception {
+        if (client.checkExists().forPath(path) != null) {
+            return client.getData().forPath(path);
+        } else {
+            return null;
         }
     }
 

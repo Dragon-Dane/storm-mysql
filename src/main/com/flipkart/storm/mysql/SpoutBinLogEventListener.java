@@ -23,6 +23,7 @@ import com.google.code.or.binlog.BinlogEventV4;
 import com.google.code.or.binlog.impl.event.DeleteRowsEvent;
 import com.google.code.or.binlog.impl.event.DeleteRowsEventV2;
 import com.google.code.or.binlog.impl.event.QueryEvent;
+import com.google.code.or.binlog.impl.event.RotateEvent;
 import com.google.code.or.binlog.impl.event.TableMapEvent;
 import com.google.code.or.binlog.impl.event.UpdateRowsEvent;
 import com.google.code.or.binlog.impl.event.UpdateRowsEventV2;
@@ -33,7 +34,8 @@ import com.google.code.or.common.glossary.Column;
 import com.google.code.or.common.glossary.Pair;
 import com.google.code.or.common.glossary.Row;
 import com.google.code.or.common.util.MySQLConstants;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,22 +50,29 @@ import static java.lang.Math.toIntExact;
  */
 public class SpoutBinLogEventListener implements BinlogEventListener {
 
+    /** The Logger. */
+    public static final Logger  LOGGER               = LoggerFactory.getLogger(SpoutBinLogEventListener.class);
     private final TransactionEvent.Builder txBuilder = CentralTxEventBuilder.INSTANCE.getBuilder();
 
     private final LinkedBlockingQueue<TransactionEvent> queue;
     private final DatabaseInfo                          databaseInfo;
     private final Map<Long, String>                     tableCache;
+    private String                                      currentBinLogFileName;
 
     /**
      * Instantiating the listener with complete database info and buffer.
      *
      * @param queue the communication channel between the listener and the spout.
      * @param databaseInfo the schema of the database.
+     * @param binLogFileName the bin log file name to start replicating from.
      */
-    public SpoutBinLogEventListener(LinkedBlockingQueue<TransactionEvent> queue, DatabaseInfo databaseInfo) {
+    public SpoutBinLogEventListener(LinkedBlockingQueue<TransactionEvent> queue,
+                                    DatabaseInfo databaseInfo,
+                                    String binLogFileName) {
         this.queue = queue;
         this.databaseInfo = databaseInfo;
         this.tableCache = new HashMap<Long, String>();
+        this.currentBinLogFileName = binLogFileName;
     }
 
     private List<Map<String, Object>> getData(String tableName, List<Row> rows) {
@@ -205,8 +214,8 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                 .txTimeStart(System.nanoTime())
                                 .database(databaseName)
                                 .serverId(toIntExact(queryEvent.getHeader().getServerId()))
-                                //.startBinLogFileName(queryEvent.getHeader().getBinlogFileName())
-                                .startBinLogPos(toIntExact(queryEvent.getHeader().getPosition()));
+                                .binLogFileName(this.currentBinLogFileName)
+                                .binLogPosition(toIntExact(queryEvent.getHeader().getPosition()));
                     }
                 }
                 break;
@@ -219,12 +228,17 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                     TransactionEvent txEvent = txBuilder.txState(TransactionState.END)
                                                         .txTimeEnd(System.nanoTime())
                                                         .txId(xidEvent.getXid())
-                                                        //.endBinLogFileName(xidEvent.getHeader().getBinlogFileName())
-                                                        .endBinLogPos(toIntExact(xidEvent.getHeader().getNextPosition()))
                                                         .build();
                     this.queue.offer(txEvent);
                 }
                 txBuilder.reset();
+                break;
+
+            case MySQLConstants.ROTATE_EVENT:
+                RotateEvent rotateEvent = (RotateEvent) event;
+                LOGGER.info("File was rotated from {} to new file {}", this.currentBinLogFileName,
+                                                    rotateEvent.getBinlogFileName().toString());
+                this.currentBinLogFileName = rotateEvent.getBinlogFileName().toString();
                 break;
 
             default:

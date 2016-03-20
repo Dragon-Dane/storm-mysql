@@ -67,7 +67,9 @@ public class OpenReplicatorManager {
         BinLogPosition binLogPosition = getBinLogPositionToStartFrom(mySqlConfig, zkConfig);
         this.openReplicator.setBinlogPosition(binLogPosition.getBinLogPosition());
         this.openReplicator.setBinlogFileName(binLogPosition.getBinLogFileName());
-        this.openReplicator.setBinlogEventListener(new SpoutBinLogEventListener(txEventQueue, getSchema(mySqlConfig)));
+        this.openReplicator.setBinlogEventListener(new SpoutBinLogEventListener(txEventQueue,
+                                                                                getSchema(mySqlConfig),
+                                                                                binLogPosition.getBinLogFileName()));
         return binLogPosition;
     }
 

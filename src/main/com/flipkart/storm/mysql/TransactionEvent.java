@@ -27,17 +27,15 @@ import java.util.List;
  */
 public final class TransactionEvent {
 
-    private final TransactionState  txState;
-    private final String            databaseName;
-    private final int               serverId;
-    private final int               startBinLogPosition;
-    private final String            startBinLogFileName;
-    private final int               endBinLogPosition;
-    private final String            endBinLogFileName;
-    private final Long              txId;
-    private final List<DataEvent>   dataEvents;
-    private final long              startTimeInNanos;
-    private final long              endTimeInNanos;
+    private TransactionState  txState;
+    private String            databaseName;
+    private int               serverId;
+    private int               binLogPosition;
+    private String            binLogFileName;
+    private Long              txId;
+    private List<DataEvent>   dataEvents;
+    private long              startTimeInNanos;
+    private long              endTimeInNanos;
 
     /**
      * The Builder class for creating the transaction event.
@@ -46,10 +44,8 @@ public final class TransactionEvent {
 
         private String              innerDataBaseName           = "";
         private int                 innerServerId               = -1;
-        private int                 innerStartBinLogPos         = -1;
-        private int                 innerEndBinLogPos           = -1;
-        private String              innerStartBinLogFileName    = "";
-        private String              innerEndBinLogFileName      = "";
+        private int                 innerBinLogPos              = -1;
+        private String              innerBinLogFileName         = "";
         private Long                innerTxId                   = null;
         private long                innerStartTimeInNanos       = 0L;
         private long                innerEndTimeInNanos         = 0L;
@@ -79,46 +75,24 @@ public final class TransactionEvent {
         }
 
         /**
-         * The starting bin log position in the bin log event.
+         * The bin log position in the bin log event.
          *
          * @param pos the position
          * @return the builder object to continue building
          */
-        public Builder startBinLogPos(int pos) {
-            this.innerStartBinLogPos = pos;
+        public Builder binLogPosition(int pos) {
+            this.innerBinLogPos = pos;
             return this;
         }
 
         /**
-         * The ending bin log position in the bin log event.
-         *
-         * @param pos the position
-         * @return the builder object to continue building
-         */
-        public Builder endBinLogPos(int pos) {
-            this.innerEndBinLogPos = pos;
-            return this;
-        }
-
-        /**
-         * The bin log file name for the start of the event.
+         * The bin log file name for the event.
          *
          * @param fileName the binlog file name
          * @return the builder object to continue building
          */
-        public Builder startBinLogFileName(String fileName) {
-            this.innerStartBinLogFileName = fileName;
-            return this;
-        }
-
-        /**
-         * The bin log file name for the end of the event.
-         *
-         * @param fileName the binlog file name
-         * @return the builder object to continue building
-         */
-        public Builder endBinLogFileName(String fileName) {
-            this.innerEndBinLogFileName = fileName;
+        public Builder binLogFileName(String fileName) {
+            this.innerBinLogFileName = fileName;
             return this;
         }
 
@@ -217,10 +191,8 @@ public final class TransactionEvent {
         public Builder reset() {
             this.innerDataBaseName           = "";
             this.innerServerId               = -1;
-            this.innerStartBinLogPos         = -1;
-            this.innerEndBinLogPos           = -1;
-            this.innerStartBinLogFileName    = "";
-            this.innerEndBinLogFileName      = "";
+            this.innerBinLogPos              = -1;
+            this.innerBinLogFileName         = "";
             this.innerTxId                   = null;
             this.innerStartTimeInNanos       = 0L;
             this.innerEndTimeInNanos         = 0L;
@@ -243,15 +215,20 @@ public final class TransactionEvent {
     private TransactionEvent(Builder builder) {
         this.databaseName           = builder.innerDataBaseName;
         this.serverId               = builder.innerServerId;
-        this.startBinLogPosition    = builder.innerStartBinLogPos;
-        this.endBinLogPosition      = builder.innerEndBinLogPos;
-        this.startBinLogFileName    = builder.innerStartBinLogFileName;
-        this.endBinLogFileName      = builder.innerEndBinLogFileName;
+        this.binLogPosition         = builder.innerBinLogPos;
+        this.binLogFileName         = builder.innerBinLogFileName;
         this.txId                   = builder.innerTxId;
         this.txState                = builder.innerTxState;
         this.dataEvents             = builder.innerDataEventList;
         this.startTimeInNanos       = builder.innerStartTimeInNanos;
         this.endTimeInNanos         = builder.innerEndTimeInNanos;
+    }
+
+    /**
+     * For ObjectMapper to instantiate object.
+     */
+    @Deprecated
+    TransactionEvent() {
     }
 
     public String getDatabaseName() {
@@ -262,28 +239,18 @@ public final class TransactionEvent {
         return serverId;
     }
 
-    @JsonIgnore
-    public int getStartBinLogPosition() {
-        return startBinLogPosition;
-    }
-
-    @JsonIgnore
-    public String getStartBinLogFileName() {
-        return startBinLogFileName;
-    }
-
-    @JsonIgnore
-    public int getEndBinLogPosition() {
-        return endBinLogPosition;
-    }
-
-    @JsonIgnore
-    public String getEndBinLogFileName() {
-        return endBinLogFileName;
-    }
-
     public List<DataEvent> getDataEvents() {
         return dataEvents;
+    }
+
+    @JsonIgnore
+    public int getBinLogPosition() {
+        return binLogPosition;
+    }
+
+    @JsonIgnore
+    public String getBinLogFileName() {
+        return binLogFileName;
     }
 
     @JsonIgnore
@@ -312,10 +279,8 @@ public final class TransactionEvent {
                 "txState=" + txState +
                 ", databaseName='" + databaseName + '\'' +
                 ", serverId=" + serverId +
-                ", startBinLogPosition=" + startBinLogPosition +
-                ", startBinLogFileName='" + startBinLogFileName + '\'' +
-                ", endBinLogPosition=" + endBinLogPosition +
-                ", endBinLogFileName='" + endBinLogFileName + '\'' +
+                ", binLogPosition=" + binLogPosition +
+                ", binLogFileName='" + binLogFileName + '\'' +
                 ", txId=" + txId +
                 ", dataEvents=" + dataEvents +
                 '}';

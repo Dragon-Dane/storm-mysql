@@ -42,4 +42,12 @@ public class RetryTransactionEvent {
     public int getNumRetries() {
         return numRetries;
     }
+
+    @Override
+    public String toString() {
+        return "RetryTransactionEvent{" +
+                "txEvent=" + txEvent +
+                ", numRetries=" + numRetries +
+                '}';
+    }
 }
