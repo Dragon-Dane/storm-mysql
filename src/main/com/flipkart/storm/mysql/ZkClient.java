@@ -72,7 +72,7 @@ public class ZkClient {
     public void write(String path, OffsetInfo offsetInfo) throws ZkException {
         try {
             String data = MAPPER.writeValueAsString(offsetInfo);
-            LOGGER.info("Writing to Zookeeper Path {} OffsetInfo {}", path, data);
+            LOGGER.debug("Writing to Zookeeper Path {} OffsetInfo {}", path, data);
             writeInternal(path, data.getBytes(Charset.forName(DEFAULT_CHARSET)));
         } catch (Exception ex) {
             LOGGER.error("Error writing to Zookeeper..Path {} Payload {}", path, offsetInfo);
@@ -94,7 +94,7 @@ public class ZkClient {
                 return null;
             }
             String data = new String(bytes, DEFAULT_CHARSET);
-            LOGGER.info("Reading from Zookeeper Path {} Payload {}", path, data);
+            LOGGER.debug("Reading from Zookeeper Path {} Payload {}", path, data);
             OffsetInfo offsetInfo = MAPPER.readValue(data, OffsetInfo.class);
             return offsetInfo;
         } catch (Exception ex) {

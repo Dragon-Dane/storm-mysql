@@ -124,7 +124,7 @@ public class OpenReplicatorManager {
             DatabaseInfo dbSchemaInfo = this.mySqlClient.getDatabaseSchema(mySqlConfig.getDatabase(),
                                                                            mySqlConfig.getTables());
             LOGGER.info("Table List to propagate events from {}", dbSchemaInfo.getAllTableNames());
-            LOGGER.info("Complete Schema Recognize : {}", dbSchemaInfo);
+            LOGGER.info("Complete Schema Recognized : {}", dbSchemaInfo);
             return dbSchemaInfo;
         } catch (SQLException ex) {
             throw new RuntimeException("Error reading schema information from MySQL...", ex);
