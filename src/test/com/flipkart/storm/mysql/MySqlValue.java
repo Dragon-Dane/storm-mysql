@@ -16,36 +16,24 @@
 
 package com.flipkart.storm.mysql;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import com.flipkart.storm.mysql.schema.ColumnDataType;
 
-public class MySqlBinLogSpoutTest
-    extends TestCase
-{
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public MySqlBinLogSpoutTest(String testName)
-    {
-        super( testName );
+public class MySqlValue {
+
+    private ColumnDataType columnDataType;
+    private Object value;
+
+
+    public MySqlValue(ColumnDataType columnDataType, Object value) {
+        this.columnDataType = columnDataType;
+        this.value = value;
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( MySqlBinLogSpoutTest.class );
+    public ColumnDataType getColumnDataType() {
+        return columnDataType;
     }
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp()
-    {
-        assertTrue( true );
+    public Object getValue() {
+        return value;
     }
 }
