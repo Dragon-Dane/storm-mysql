@@ -463,6 +463,9 @@ Not Supported
     TINYBLOB,
     MEDIUMBLOB,
     LONGBLOB
+    
+If table schema is changed, or if a table is added that needs bin log tailing the topology would
+have to be re-submitted.
   
 ##Committers
 
