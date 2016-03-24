@@ -40,6 +40,7 @@ public class MySqlClient {
     private MySqlConnectionFactory connectionFactory;
     private static final String GET_MYSQL_TABLE_SCHEMA =
             "SELECT * FROM information_schema.columns WHERE table_schema = ? and table_name = ?";
+    private static final String SHOW_MASTER_STATUS = "SHOW MASTER STATUS";
 
     /**
      * Instantiate the mysql client with the connection factory.
@@ -80,7 +81,7 @@ public class MySqlClient {
      * @throws SQLException
      */
     public BinLogPosition getBinLogDetails() throws SQLException {
-        ResultSet resultSet = connectionFactory.getConnection().createStatement().executeQuery("SHOW MASTER STATUS");
+        ResultSet resultSet = connectionFactory.getConnection().createStatement().executeQuery(SHOW_MASTER_STATUS);
         resultSet.next();
         BinLogPosition binLogPosition = new BinLogPosition(resultSet.getInt("Position"), resultSet.getString("File"));
         resultSet.close();

@@ -23,11 +23,14 @@ import com.google.code.or.binlog.impl.event.DeleteRowsEvent;
 import com.google.code.or.binlog.impl.event.DeleteRowsEventV2;
 import com.google.code.or.binlog.impl.event.QueryEvent;
 import com.google.code.or.binlog.impl.event.TableMapEvent;
+import com.google.code.or.binlog.impl.event.UpdateRowsEvent;
+import com.google.code.or.binlog.impl.event.UpdateRowsEventV2;
 import com.google.code.or.binlog.impl.event.WriteRowsEvent;
 import com.google.code.or.binlog.impl.event.WriteRowsEventV2;
 import com.google.code.or.binlog.impl.event.XidEvent;
 import com.google.code.or.common.glossary.Column;
 import com.google.code.or.common.glossary.Row;
+import com.google.code.or.common.glossary.Pair;
 import com.google.code.or.common.glossary.column.Int24Column;
 import com.google.code.or.common.glossary.column.StringColumn;
 import com.google.code.or.common.util.MySQLConstants;
@@ -41,26 +44,39 @@ import java.util.List;
  */
 public class BinLogEventGenerator {
 
-    public static List<BinlogEventV4> getSingleActionResult(String dbName, String tableName, long tableId,
+    public static List<BinlogEventV4> getEventsForSingleTransaction(String dbName, String tableName, long tableId,
                                   int eventType, List<MySqlValue> valueList) {
 
-        Preconditions.checkArgument(validate(eventType),
-                "Incorrect Usage, Event must a supported DML(Delete/Write/Update) type");
+        Preconditions.checkArgument(validateDW(eventType), "Incorrect Usage, Event must a Delete/Write type");
 
         List<BinlogEventV4> eventV4List = new ArrayList<BinlogEventV4>();
         eventV4List.add(formBinLogQueryEvent(dbName));
         eventV4List.add(formBinLogTableMapEvent(dbName, tableName, tableId));
-        eventV4List.add(formDataEvent(tableId, eventType, valueList));
+        eventV4List.add(formDWDataEvent(tableId, eventType, valueList));
+        eventV4List.add(formXidEvent(1234));
+        return eventV4List;
+    }
+
+    public static List<BinlogEventV4> getEventsForUpdateTransaction(String dbName, String tableName, long tableId,
+                                                                    int eventType,
+                                                                    List<MySqlValue> oldValueList,
+                                                                    List<MySqlValue> newValueList) {
+
+        Preconditions.checkArgument(validateU(eventType), "Incorrect Usage, Event must an Update type");
+
+        List<BinlogEventV4> eventV4List = new ArrayList<BinlogEventV4>();
+        eventV4List.add(formBinLogQueryEvent(dbName));
+        eventV4List.add(formBinLogTableMapEvent(dbName, tableName, tableId));
+        eventV4List.add(formUDataEvent(tableId, eventType, oldValueList, newValueList));
         eventV4List.add(formXidEvent(1234));
         return eventV4List;
     }
 
     /**
-     * This creates the Data Event based on the parameters passed.
+     * This creates the Data Event based on the parameters passed. Delete/Write Only.
      */
-    private static BinlogEventV4 formDataEvent(long tableId, int eventType, List<MySqlValue> valueList) {
-        //Third Event is the actual DML event
-        //Currently only write and update. Do Update later.
+    private static BinlogEventV4 formDWDataEvent(long tableId, int eventType, List<MySqlValue> valueList) {
+
         BinlogEventV4HeaderImpl eventV4Header = new BinlogEventV4HeaderImpl();
         eventV4Header.setTimestamp(System.currentTimeMillis());
         eventV4Header.setEventType(eventType);
@@ -85,6 +101,31 @@ public class BinLogEventGenerator {
             deleteRowsEvent.setTableId(tableId);
             deleteRowsEvent.setRows(getRows(valueList));
             return deleteRowsEvent;
+        }
+        return null;
+    }
+
+    /**
+     * This creates the Data Event based on the parameters passed. Update Only.
+     */
+    private static BinlogEventV4 formUDataEvent(long tableId, int eventType, List<MySqlValue> oldValueList, List<MySqlValue> newValueList) {
+
+        Preconditions.checkArgument(oldValueList.size() == newValueList.size(), "Size of Old List and New List should be the same..");
+
+        BinlogEventV4HeaderImpl eventV4Header = new BinlogEventV4HeaderImpl();
+        eventV4Header.setTimestamp(System.currentTimeMillis());
+        eventV4Header.setEventType(eventType);
+        eventV4Header.setServerId(1);
+        if (eventType == MySQLConstants.UPDATE_ROWS_EVENT_V2) {
+            UpdateRowsEventV2 updateRowsEventV2 = new UpdateRowsEventV2(eventV4Header);
+            updateRowsEventV2.setTableId(tableId);
+            updateRowsEventV2.setRows(getRowPairs(oldValueList, newValueList));
+            return updateRowsEventV2;
+        } else if (eventType == MySQLConstants.UPDATE_ROWS_EVENT) {
+            UpdateRowsEvent updateRowsEvent = new UpdateRowsEvent(eventV4Header);
+            updateRowsEvent.setTableId(tableId);
+            updateRowsEvent.setRows(getRowPairs(oldValueList, newValueList));
+            return updateRowsEvent;
         }
         return null;
     }
@@ -143,27 +184,58 @@ public class BinLogEventGenerator {
         Row singleRow = new Row();
         List<Column> columns = new ArrayList<Column>();
         for (MySqlValue value : valueList) {
-            if (value.getColumnDataType() == ColumnDataType.VARCHAR) {
-                String s = (String)value.getValue();
-                columns.add(StringColumn.valueOf(s.getBytes()));
-            } else if (value.getColumnDataType() == ColumnDataType.INT) {
-                int i = (Integer)value.getValue();
-                columns.add(Int24Column.valueOf(i));
-            } else {
-                throw new RuntimeException("This type is not supported.." + value.getColumnDataType() );
-            }
+            columns.add(getColumn(value));
         }
         singleRow.setColumns(columns);
         rows.add(singleRow);
         return rows;
     }
 
-    private static boolean validate(int eventType) {
+    private static List<Pair<Row>> getRowPairs(List<MySqlValue> oldValueList, List<MySqlValue> newValueList) {
+        List<Pair<Row>> rowPairs = new ArrayList<Pair<Row>>();
+        Row oldRow = new Row();
+        Row newRow = new Row();
+        List<Column> oldColumns = new ArrayList<Column>();
+        List<Column> newColumns = new ArrayList<Column>();
+
+        for (int index = 0; index < oldValueList.size(); ++index) {
+            MySqlValue oldValue = oldValueList.get(index);
+            oldColumns.add(getColumn(oldValue));
+
+            MySqlValue newValue = newValueList.get(index);
+            newColumns.add(getColumn(newValue));
+        }
+        oldRow.setColumns(oldColumns);
+        newRow.setColumns(newColumns);
+        Pair<Row> rowPair = new Pair<Row>(oldRow, newRow);
+        rowPairs.add(rowPair);
+        return rowPairs;
+    }
+
+    private static Column getColumn(MySqlValue value) {
+        if (value.getColumnDataType() == ColumnDataType.VARCHAR) {
+            String s = (String)value.getValue();
+            return StringColumn.valueOf(s.getBytes());
+        } else if (value.getColumnDataType() == ColumnDataType.INT) {
+            int i = (Integer)value.getValue();
+            return Int24Column.valueOf(i);
+        } else {
+            throw new RuntimeException("This type is not supported.." + value.getColumnDataType());
+        }
+    }
+
+    private static boolean validateDW(int eventType) {
         if (!((eventType == MySQLConstants.DELETE_ROWS_EVENT) ||
                 (eventType == MySQLConstants.DELETE_ROWS_EVENT_V2) ||
                 (eventType == MySQLConstants.WRITE_ROWS_EVENT) ||
-                (eventType == MySQLConstants.WRITE_ROWS_EVENT_V2) ||
-                (eventType == MySQLConstants.UPDATE_ROWS_EVENT) ||
+                (eventType == MySQLConstants.WRITE_ROWS_EVENT_V2))) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean validateU(int eventType) {
+        if (!((eventType == MySQLConstants.UPDATE_ROWS_EVENT) ||
                 (eventType == MySQLConstants.UPDATE_ROWS_EVENT_V2))) {
             return false;
         }

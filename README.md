@@ -1,7 +1,7 @@
 <img src="https://github.com/flipkart-incubator/storm-mysql/blob/master/images/StormSpout.png">
 
 
-#Storm MySql
+#Storm MySql Spout
 
 [![][travis img]][travis]
 [![][sonatype img]][sonatype]
@@ -207,7 +207,7 @@ MySqlConfig mySqlConfig = new MySqlConfig.Builder("testDatabase")
                                              .serverId(1)
                                              .binLogFilename("mysql-bin.000017")
                                              .binLogPosition(4)
-                                             .tables(Sets.newHashSet("ATable", "BTable"))
+                                             .includeTables(Sets.newHashSet("ATable", "BTable"))
                                              .build();
 ```
                                                  
@@ -302,7 +302,7 @@ ZkBinLogStateConfig zkBinLogStateConfig = new ZkBinLogStateConfig.Builder("my-sp
                                                                  .sessionTimeOutInMs(100)
                                                                  .retryTimes(5)
                                                                  .connectionTimeOutInMs(100)
-                                                                 .updateRate(1000)
+                                                                 .updateRateInMs(1000)
                                                                  .build();
 ```
 

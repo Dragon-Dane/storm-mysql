@@ -115,6 +115,7 @@ public class OpenReplicatorManager {
         if (Strings.isNullOrEmpty(mysqlConfig.getBinLogFileName())) {
             return this.mySqlClient.getBinLogDetails();
         } else {
+
             return new BinLogPosition(mysqlConfig.getBinLogPosition(), mysqlConfig.getBinLogFileName());
         }
     }
