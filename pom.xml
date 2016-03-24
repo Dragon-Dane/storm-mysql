@@ -31,7 +31,7 @@
         <repository>
             <id>sonatype-stage</id>
             <name>Sonatype Nexus Staging</name>
-            <url>https://oss.sonatype.org/content/repositories/comflipkart-1013</url>
+            <url>https://oss.sonatype.org/content/repositories/comflipkart-1014</url>
         </repository>
     </repositories>
 
