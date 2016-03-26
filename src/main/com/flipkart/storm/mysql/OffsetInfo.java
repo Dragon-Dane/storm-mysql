@@ -82,4 +82,32 @@ public class OffsetInfo {
     public String getDatabaseName() {
         return databaseName;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OffsetInfo that = (OffsetInfo) o;
+
+        if (binLogPosition != that.binLogPosition) return false;
+        if (scn != that.scn) return false;
+        if (!binLogFileName.equals(that.binLogFileName)) return false;
+        if (!databaseName.equals(that.databaseName)) return false;
+        if (!topologyInstanceId.equals(that.topologyInstanceId)) return false;
+        if (!topologyName.equals(that.topologyName)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (scn ^ (scn >>> 32));
+        result = 31 * result + topologyName.hashCode();
+        result = 31 * result + topologyInstanceId.hashCode();
+        result = 31 * result + databaseName.hashCode();
+        result = 31 * result + binLogPosition;
+        result = 31 * result + binLogFileName.hashCode();
+        return result;
+    }
 }

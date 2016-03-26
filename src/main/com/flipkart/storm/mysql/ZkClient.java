@@ -40,22 +40,18 @@ public class ZkClient {
     /**
      * Instantiating the zookeeper client.
      *
-     * @param servers list of servers to connect to
-     * @param port the port on which to connect
-     * @param sessionTimeoutMs the session timeout
-     * @param connectionTimeoutMs the connection timeout
-     * @param retryTimes number of retries to zookeeper
-     * @param sleepMsBetweenRetries time to sleep between retries
+     * @param zkConf The Zookeeper Configuration.
      */
-    public ZkClient(List<String> servers, int port,
-                    int sessionTimeoutMs, int connectionTimeoutMs,
-                    int retryTimes, int sleepMsBetweenRetries) {
+    public ZkClient(ZkConf zkConf) {
 
-        client = CuratorFrameworkFactory.newClient(getZkServerPorts(servers, port),
-                                                           sessionTimeoutMs,
-                                                           connectionTimeoutMs,
-                                                           new RetryNTimes(retryTimes, sleepMsBetweenRetries));
+        client = CuratorFrameworkFactory.newClient(getZkServerPorts(zkConf.getZkServers(),
+                                                    zkConf.getZkPort()),
+                                                    zkConf.getZkSessionTimeout(),
+                                                    zkConf.getZkConnectionTimeout(),
+                                                    new RetryNTimes(zkConf.getRetryTimes(),
+                                                    zkConf.getSleepMsBetweenRetries()));
     }
+
 
     /**
      * Write at zookeeper path.

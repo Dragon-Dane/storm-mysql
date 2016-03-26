@@ -116,7 +116,7 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.17</version>
                 <configuration>
-                    <failsOnError>true</failsOnError>
+                    <failsOnError>false</failsOnError>
                     <configLocation>checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                 </configuration>
@@ -202,6 +202,7 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
             <version>${curator-version}</version>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>
@@ -209,10 +210,9 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.testng</groupId>
-                    <artifactId>testing</artifactId>
+                    <artifactId>testng</artifactId>
                 </exclusion>
             </exclusions>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>

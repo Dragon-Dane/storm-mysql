@@ -16,16 +16,13 @@
 
 package com.flipkart.storm.mysql;
 
-import backtype.storm.Config;
 import com.google.common.base.Preconditions;
-
-import java.util.List;
 import java.util.Map;
 
 /**
- * This factory is responsible for creating the all external clients. (Zk/Mysql)
- * It has been structured in such a way, so as to make it easy for testing.
- * This class/methods are not static so as to make it testable via mockito. Will think
+ * This factory is responsible for creating the all external clients. (Zk/Mysql/OR)
+ * It has been structured in such a way, to make it easy for testing.
+ * This class/methods are not static to make it testable via mockito. Will think
  * about using PowerMock or something similar later.
  */
 public class ClientFactory {
@@ -38,41 +35,7 @@ public class ClientFactory {
      * @return the zk client
      */
     public ZkClient getZkClient(Map stormConf, ZkBinLogStateConfig zkBinLogStateConfig) {
-
-        List<String> zkServers = zkBinLogStateConfig.getZkServers();
-        if (zkServers == null) {
-            zkServers = (List<String>) stormConf.get(Config.STORM_ZOOKEEPER_SERVERS);
-        }
-
-        Integer zkPort = zkBinLogStateConfig.getZkPort();
-        if (zkPort == null) {
-            zkPort = ((Number) stormConf.get(Config.STORM_ZOOKEEPER_PORT)).intValue();
-        }
-
-        Integer zkSessionTimeout = zkBinLogStateConfig.getZkSessionTimeoutInMs();
-        if (zkSessionTimeout == null) {
-            zkSessionTimeout = ((Number) stormConf.get(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT)).intValue();
-        }
-
-        Integer zkConnectionTimeout = zkBinLogStateConfig.getZkConnectionTimeoutInMs();
-        if (zkConnectionTimeout == null) {
-            zkConnectionTimeout = ((Number) stormConf.get(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT)).intValue();
-        }
-
-        Integer retryTimes = zkBinLogStateConfig.getZkRetryTimes();
-        if (retryTimes == null) {
-            retryTimes = ((Number) stormConf.get(Config.STORM_ZOOKEEPER_RETRY_TIMES)).intValue();
-        }
-
-        Integer sleepMsBetweenRetries = zkBinLogStateConfig.getZkSleepMsBetweenRetries();
-        if (sleepMsBetweenRetries == null) {
-            sleepMsBetweenRetries = ((Number) stormConf.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL)).intValue();
-        }
-
-        return new ZkClient(zkServers, zkPort,
-                            zkSessionTimeout, zkConnectionTimeout,
-                            retryTimes, sleepMsBetweenRetries);
-
+        return new ZkClient(new ZkConf(stormConf, zkBinLogStateConfig));
     }
 
     /**

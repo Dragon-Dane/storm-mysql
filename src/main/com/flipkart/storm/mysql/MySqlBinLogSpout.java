@@ -105,7 +105,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         this.collector          = spoutOutputCollector;
         this.topologyInstanceId = context.getStormId();
         this.topologyName       = conf.get(Config.TOPOLOGY_NAME).toString();
-        this.databaseName = this.spoutConfig.getMysqlConfig().getDatabase();
+        this.databaseName       = this.spoutConfig.getMysqlConfig().getDatabase();
 
         initializeAndRegisterAllMetrics(context);
 
