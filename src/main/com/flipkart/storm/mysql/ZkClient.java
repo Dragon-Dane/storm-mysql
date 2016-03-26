@@ -50,16 +50,11 @@ public class ZkClient {
     public ZkClient(List<String> servers, int port,
                     int sessionTimeoutMs, int connectionTimeoutMs,
                     int retryTimes, int sleepMsBetweenRetries) {
-        try {
-                client = CuratorFrameworkFactory.newClient(getZkServerPorts(servers, port),
+
+        client = CuratorFrameworkFactory.newClient(getZkServerPorts(servers, port),
                                                            sessionTimeoutMs,
                                                            connectionTimeoutMs,
                                                            new RetryNTimes(retryTimes, sleepMsBetweenRetries));
-
-                client.start();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
     }
 
     /**
@@ -100,6 +95,17 @@ public class ZkClient {
         } catch (Exception ex) {
             LOGGER.error("Error while reading from Zk Path..{} Exception {}", path, ex.getMessage());
             throw new ZkException("Error reading from Zookeeper..Path: " + path, ex);
+        }
+    }
+
+    /**
+     * Start the zookeeper client.
+     */
+    public void start() {
+        try {
+            client.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

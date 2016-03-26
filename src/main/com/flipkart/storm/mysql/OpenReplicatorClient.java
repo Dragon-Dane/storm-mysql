@@ -28,28 +28,29 @@ import java.util.concurrent.TimeUnit;
 /**
  * Wrapper over open replicator. Takes care of retrieving the MySql schema as well.
  */
-public class OpenReplicatorManager {
+public class OpenReplicatorClient {
 
     /** The logger. */
-    public static final Logger LOGGER = LoggerFactory.getLogger(OpenReplicatorManager.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(OpenReplicatorClient.class);
 
     private OpenReplicator      openReplicator;
     private final ZkClient      zkClient;
     private final MySqlClient   mySqlClient;
 
     /**
-     * Provide Open Replicator Manager with clients.
+     * Provide Open Replicator Client with external clients.
      *
      * @param mysqlClient the mysql client
      * @param client the zookeeper client
      */
-    public OpenReplicatorManager(MySqlClient mysqlClient, ZkClient client) {
+    public OpenReplicatorClient(MySqlClient mysqlClient, ZkClient client) {
         this.zkClient = client;
         this.mySqlClient = mysqlClient;
     }
 
     /**
      * Initialize while providing user spout configurations and internal transaction buffer.
+     *
      * @param mySqlConfig Mysql user defined configurations.
      * @param zkConfig Zookeeper configurations.
      * @param txEventQueue the internal buffer for transaction events.
@@ -76,7 +77,7 @@ public class OpenReplicatorManager {
     /**
      * Start the replication.
      */
-    public void startReplication() {
+    public void start() {
         try {
             this.openReplicator.start();
         } catch (Exception ex) {

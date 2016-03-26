@@ -32,9 +32,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class OpenReplicatorManagerTest {
+public class OpenReplicatorClientTest {
 
-    private OpenReplicatorManager   openReplicatorManager;
+    private OpenReplicatorClient    openReplicatorClient;
     private MySqlClient             mySqlClient;
     private ZkClient                zkClient;
     private MySqlConfig             mySqlConfig;
@@ -45,7 +45,7 @@ public class OpenReplicatorManagerTest {
     public void init() {
         mySqlClient = Mockito.mock(MySqlClient.class);
         zkClient = Mockito.mock(ZkClient.class);
-        openReplicatorManager = new OpenReplicatorManager(mySqlClient, zkClient);
+        openReplicatorClient = new OpenReplicatorClient(mySqlClient, zkClient);
         mockTxEventQueue = Mockito.mock(LinkedBlockingQueue.class);
 
         mySqlConfig = new MySqlConfig.Builder("testDatabase")
@@ -77,7 +77,7 @@ public class OpenReplicatorManagerTest {
         when(mySqlClient.getDatabaseSchema(anyString(), anySet())).thenReturn(Mockito.mock(DatabaseInfo.class));
         when(zkClient.read(anyString())).thenReturn(offsetInfo);
 
-        BinLogPosition binLogPosition = this.openReplicatorManager.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
+        BinLogPosition binLogPosition = this.openReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
 
         verify(mySqlClient, times(0)).getBinLogDetails();
         verify(zkClient, times(1)).read(anyString());
@@ -90,7 +90,7 @@ public class OpenReplicatorManagerTest {
         when(mySqlClient.getDatabaseSchema(anyString(), anySet())).thenReturn(Mockito.mock(DatabaseInfo.class));
         when(zkClient.read(anyString())).thenReturn(null);
 
-        BinLogPosition binLogPosition = this.openReplicatorManager.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
+        BinLogPosition binLogPosition = this.openReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
 
         verify(mySqlClient, times(0)).getBinLogDetails();
         verify(zkClient, times(1)).read(anyString());
@@ -111,7 +111,7 @@ public class OpenReplicatorManagerTest {
         when(mySqlClient.getDatabaseSchema(anyString(), anySet())).thenReturn(Mockito.mock(DatabaseInfo.class));
         when(zkClient.read(anyString())).thenReturn(null);
 
-        BinLogPosition binLogPosition = this.openReplicatorManager.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
+        BinLogPosition binLogPosition = this.openReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
 
         verify(mySqlClient, times(0)).getBinLogDetails();
         verify(zkClient, times(1)).read(anyString());
@@ -132,7 +132,7 @@ public class OpenReplicatorManagerTest {
         when(mySqlClient.getBinLogDetails()).thenReturn(new BinLogPosition(7231, "mysql-bin.000077"));
         when(zkClient.read(anyString())).thenReturn(null);
 
-        BinLogPosition binLogPosition = this.openReplicatorManager.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
+        BinLogPosition binLogPosition = this.openReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
 
         verify(mySqlClient, times(1)).getBinLogDetails();
         verify(zkClient, times(1)).read(anyString());
@@ -158,7 +158,7 @@ public class OpenReplicatorManagerTest {
         when(mySqlClient.getDatabaseSchema(anyString(), anySet())).thenReturn(Mockito.mock(DatabaseInfo.class));
         when(zkClient.read(anyString())).thenReturn(null);
 
-        BinLogPosition binLogPosition = this.openReplicatorManager.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
+        BinLogPosition binLogPosition = this.openReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, mockTxEventQueue);
 
         verify(mySqlClient, times(0)).getBinLogDetails();
         verify(zkClient, times(0)).read(anyString());

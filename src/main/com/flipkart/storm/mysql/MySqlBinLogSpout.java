@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.List;
+
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -57,9 +57,11 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private String                  topologyName;
     private ZkClient                zkClient;
     private MySqlClient             mySqlClient;
-    private OpenReplicatorManager   replicatorManager;
+    private OpenReplicatorClient    openReplicatorClient;
     private SpoutOutputCollector    collector;
     private long                    zkLastUpdateMs;
+    private ClientFactory           clientFactory;
+
 
     private SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
     private LinkedBlockingQueue<TransactionEvent>   txQueue                   = new LinkedBlockingQueue<TransactionEvent>();
@@ -76,7 +78,19 @@ public class MySqlBinLogSpout extends BaseRichSpout {
      * @param spoutConfig MySql + Zookeeper Configuration
      */
     public MySqlBinLogSpout(MySqlSpoutConfig spoutConfig) {
+        this (spoutConfig, new ClientFactory());
+    }
+
+    /**
+     * Initialize the MySql Spout, with provided client factories.
+     * This will mostly be used in unit testing.
+     *
+     * @param spoutConfig MySql + Zookeeper Configuration
+     * @param clientFactory Client Factory
+     */
+    public MySqlBinLogSpout(MySqlSpoutConfig spoutConfig, ClientFactory clientFactory) {
         this.spoutConfig = spoutConfig;
+        this.clientFactory = clientFactory;
     }
 
     @Override
@@ -91,57 +105,33 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         this.collector          = spoutOutputCollector;
         this.topologyInstanceId = context.getStormId();
         this.topologyName       = conf.get(Config.TOPOLOGY_NAME).toString();
-
-        List<String> zkServers = this.spoutConfig.getZkBinLogStateConfig().getZkServers();
-        if (zkServers == null) {
-            zkServers = (List<String>) conf.get(Config.STORM_ZOOKEEPER_SERVERS);
-        }
-
-        Integer zkPort = this.spoutConfig.getZkBinLogStateConfig().getZkPort();
-        if (zkPort == null) {
-            zkPort = ((Number) conf.get(Config.STORM_ZOOKEEPER_PORT)).intValue();
-        }
-
-        Integer zkSessionTimeout = this.spoutConfig.getZkBinLogStateConfig().getZkSessionTimeoutInMs();
-        if (zkSessionTimeout == null) {
-            zkSessionTimeout = ((Number) conf.get(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT)).intValue();
-        }
-
-        Integer zkConnectionTimeout = this.spoutConfig.getZkBinLogStateConfig().getZkConnectionTimeoutInMs();
-        if (zkConnectionTimeout == null) {
-            zkConnectionTimeout = ((Number) conf.get(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT)).intValue();
-        }
-
-        Integer retryTimes = this.spoutConfig.getZkBinLogStateConfig().getZkRetryTimes();
-        if (retryTimes == null) {
-            retryTimes = ((Number) conf.get(Config.STORM_ZOOKEEPER_RETRY_TIMES)).intValue();
-        }
-
-        Integer sleepMsBetweenRetries = this.spoutConfig.getZkBinLogStateConfig().getZkSleepMsBetweenRetries();
-        if (sleepMsBetweenRetries == null) {
-            sleepMsBetweenRetries = ((Number) conf.get(Config.STORM_ZOOKEEPER_RETRY_INTERVAL)).intValue();
-        }
-
         this.databaseName = this.spoutConfig.getMysqlConfig().getDatabase();
 
         initializeAndRegisterAllMetrics(context);
-        zkClient = new ZkClient(zkServers, zkPort, zkSessionTimeout,
-                    zkConnectionTimeout, retryTimes, sleepMsBetweenRetries);
 
-        mySqlClient = new MySqlClient(new MySqlConnectionFactory(this.spoutConfig.getMysqlConfig()));
+        zkClient = this.clientFactory.getZkClient(conf, this.spoutConfig.getZkBinLogStateConfig());
+        mySqlClient = this.clientFactory.getMySqlClient(this.spoutConfig.getMysqlConfig());
+        openReplicatorClient = this.clientFactory.getReplicatorClient(mySqlClient, zkClient);
 
-        replicatorManager = new OpenReplicatorManager(mySqlClient, zkClient);
-        this.lastEmittedBeginTxPosition = replicatorManager.initialize(this.spoutConfig.getMysqlConfig(),
-                                     this.spoutConfig.getZkBinLogStateConfig(),
-                                     this.txQueue);
-        replicatorManager.startReplication();
+        begin();
+    }
+
+    /**
+     * Start all clients.
+     */
+    public void begin() {
+        this.zkClient.start();
+        this.lastEmittedBeginTxPosition = openReplicatorClient.initialize(this.spoutConfig.getMysqlConfig(),
+                                                                       this.spoutConfig.getZkBinLogStateConfig(),
+                                                                       this.txQueue);
+        openReplicatorClient.start();
     }
 
     @Override
     public void close() {
         zkClient.close();
         mySqlClient.close();
-        replicatorManager.close();
+        openReplicatorClient.close();
     }
 
     @Override
