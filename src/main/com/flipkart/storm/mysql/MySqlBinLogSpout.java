@@ -49,7 +49,6 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private long                msgSidelineCount           = 0;
     private long                msgFailedCount             = 0;
     private long                currentCommittedOffsetInZk = -1;
-    private BinLogPosition      lastEmittedBeginTxPosition = null;
     private String              databaseName               = null;
 
     private final MySqlSpoutConfig  spoutConfig;
@@ -62,15 +61,16 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private long                    zkLastUpdateMs;
     private ClientFactory           clientFactory;
 
-
-    private SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
-    private LinkedBlockingQueue<TransactionEvent>   txQueue                   = new LinkedBlockingQueue<TransactionEvent>();
-    private SortedMap<Long, RetryTransactionEvent>  pendingMessagesToBeAcked  = new TreeMap<Long, RetryTransactionEvent>();
-
     private AssignableMetric failureCountMetric;
     private AssignableMetric sidelineCountMetric;
     private AssignableMetric successCountMetric;
     private ReducedMetric    txEventProcessTime;
+
+    BinLogPosition  lastEmittedBeginTxPosition = null;
+    SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
+    LinkedBlockingQueue<TransactionEvent>   txQueue                   = new LinkedBlockingQueue<TransactionEvent>();
+    SortedMap<Long, RetryTransactionEvent>  pendingMessagesToBeAcked  = new TreeMap<Long, RetryTransactionEvent>();
+
 
     /**
      * Initialize the MySql Spout.
