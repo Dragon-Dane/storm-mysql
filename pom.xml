@@ -43,14 +43,6 @@
         <url>http://flipkart.com</url>
     </organization>
 
-    <repositories>
-        <repository>
-            <id>sonatype-stage</id>
-            <name>Sonatype Nexus Staging</name>
-            <url>https://oss.sonatype.org/content/repositories/comflipkart-1014</url>
-        </repository>
-    </repositories>
-
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
