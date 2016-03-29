@@ -59,7 +59,7 @@ public class MySqlClient {
      * @throws SQLException
      */
     public DatabaseInfo getDatabaseSchema(String databaseName, Set<String> tableNames) throws SQLException {
-        if (tableNames.size() == 0) {
+        if (tableNames == null || tableNames.size() == 0) {
             tableNames = getAllTables();
         }
         Map<String, TableInfo> tableSchemas = new HashMap<String, TableInfo>();

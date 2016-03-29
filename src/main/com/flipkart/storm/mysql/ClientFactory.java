@@ -17,6 +17,8 @@
 package com.flipkart.storm.mysql;
 
 import com.google.common.base.Preconditions;
+
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -25,7 +27,7 @@ import java.util.Map;
  * This class/methods are not static to make it testable via mockito. Will think
  * about using PowerMock or something similar later.
  */
-public class ClientFactory {
+public class ClientFactory implements Serializable {
 
     /**
      * Get the zookeeper client.
