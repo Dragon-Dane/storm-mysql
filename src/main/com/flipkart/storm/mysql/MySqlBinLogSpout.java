@@ -169,6 +169,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
         try {
             if (txRetrEvent != null) {
+                LOGGER.debug("Received Tx Event in Spout...{}", txRetrEvent);
                 TransactionEvent txEvent = txRetrEvent.getTxEvent();
                 this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
                     String txJson = MAPPER.writeValueAsString(txEvent);
