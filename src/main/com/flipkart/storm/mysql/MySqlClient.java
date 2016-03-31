@@ -20,6 +20,8 @@ import com.flipkart.storm.mysql.schema.ColumnInfo;
 import com.flipkart.storm.mysql.schema.DatabaseInfo;
 import com.flipkart.storm.mysql.schema.RowInfo;
 import com.flipkart.storm.mysql.schema.TableInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -42,6 +44,9 @@ public class MySqlClient {
             "SELECT * FROM information_schema.columns WHERE table_schema = ? and table_name = ?";
     private static final String SHOW_MASTER_STATUS = "SHOW MASTER STATUS";
 
+    /** The logger. */
+    public static final Logger LOGGER = LoggerFactory.getLogger(MySqlClient.class);
+
     /**
      * Instantiate the mysql client with the connection factory.
      * @param connectionFactory the connection factory
@@ -60,17 +65,21 @@ public class MySqlClient {
      */
     public DatabaseInfo getDatabaseSchema(String databaseName, Set<String> tableNames) throws SQLException {
         if (tableNames == null || tableNames.size() == 0) {
+            LOGGER.info("Since no tables config was provided, considering all tables in database : {}", databaseName);
             tableNames = getAllTables();
         }
+        LOGGER.info("Considering following tables {}", tableNames);
         Map<String, TableInfo> tableSchemas = new HashMap<String, TableInfo>();
         for (String tableName : tableNames) {
+            List<ColumnInfo> columnInfoList = getColumnInfo(databaseName, tableName);
+            LOGGER.info("Got column list for table : {}, columns {}", tableName, columnInfoList);
+
+            RowInfo rowInfo = new RowInfo(columnInfoList);
+            TableInfo tableInfo = new TableInfo(tableName, rowInfo);
             //Converting to lowercase cause open replicator seems to return
             //all bin log events with tables in lowercase. The comparison for
             //filtering events works correctly then.
-            String lowerCaseTableName = tableName.toLowerCase();
-            RowInfo rowInfo = new RowInfo(getColumnInfo(databaseName, lowerCaseTableName));
-            TableInfo tableInfo = new TableInfo(lowerCaseTableName, rowInfo);
-            tableSchemas.put(lowerCaseTableName, tableInfo);
+            tableSchemas.put(tableName.toLowerCase(), tableInfo);
         }
         return new DatabaseInfo(databaseName, tableSchemas);
     }
@@ -102,6 +111,8 @@ public class MySqlClient {
                                                                     .prepareStatement(GET_MYSQL_TABLE_SCHEMA);
         columnDetailsStatement.setString(1, databaseName);
         columnDetailsStatement.setString(2, tableName);
+
+        LOGGER.info("Executing column info query : {}", columnDetailsStatement.toString());
         ResultSet resultSet = columnDetailsStatement.executeQuery();
 
         while (resultSet.next()) {
@@ -120,7 +131,7 @@ public class MySqlClient {
         ResultSet resultSet = meta.getTables(null, null, null, new String[] {"TABLE"});
         Set<String> tableSet = new HashSet<String>();
         while (resultSet.next()) {
-            tableSet.add(resultSet.getString("TABLE_NAME").toLowerCase());
+            tableSet.add(resultSet.getString("TABLE_NAME"));
         }
         resultSet.close();
         return tableSet;
