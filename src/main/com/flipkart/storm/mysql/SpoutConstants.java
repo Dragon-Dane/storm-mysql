@@ -52,7 +52,7 @@ public final class SpoutConstants {
     /**
      * The default mysql server id.
      */
-    public static final int    DEFAULT_MYSQL_SERVERID       = 1;
+    public static final int    DEFAULT_MYSQL_SERVERID       = 6789;
 
     /**
      * The default mysql bin log position.
