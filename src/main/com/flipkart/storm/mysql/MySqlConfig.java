@@ -205,4 +205,19 @@ public final class MySqlConfig implements Serializable {
     public Set<String> getTables() {
         return includeTables;
     }
+
+    @Override
+    public String toString() {
+        return "MySqlConfig{" +
+                "user='" + user + '\'' +
+                ", password='" + password + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", serverId=" + serverId +
+                ", binLogPosition=" + binLogPosition +
+                ", binLogFileName='" + binLogFileName + '\'' +
+                ", database='" + database + '\'' +
+                ", includeTables=" + includeTables +
+                '}';
+    }
 }

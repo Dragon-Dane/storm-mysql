@@ -102,6 +102,8 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         Preconditions.checkNotNull(this.spoutConfig.getMysqlConfig(),
                 "Mysql Config cannot be null");
 
+        LOGGER.info("Initiating MySql Spout with config {}", this.spoutConfig.toString());
+
         this.collector          = spoutOutputCollector;
         this.topologyInstanceId = context.getStormId();
         this.topologyName       = conf.get(Config.TOPOLOGY_NAME).toString();

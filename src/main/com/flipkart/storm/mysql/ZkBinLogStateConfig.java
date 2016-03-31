@@ -233,4 +233,21 @@ public final class ZkBinLogStateConfig implements Serializable {
     public boolean isZkIgnoreBinLogPosition() {
         return zkIgnoreBinLogPosition;
     }
+
+    @Override
+    public String toString() {
+        return "ZkBinLogStateConfig{" +
+                "zkServers=" + zkServers +
+                ", zkPort=" + zkPort +
+                ", zkRoot='" + zkRoot + '\'' +
+                ", zkSpoutId='" + zkSpoutId + '\'' +
+                ", zkScnCommitPath='" + zkScnCommitPath + '\'' +
+                ", zkScnUpdateRateInMs=" + zkScnUpdateRateInMs +
+                ", zkSessionTimeoutInMs=" + zkSessionTimeoutInMs +
+                ", zkConnectionTimeoutInMs=" + zkConnectionTimeoutInMs +
+                ", zkRetryTimes=" + zkRetryTimes +
+                ", zkSleepMsBetweenRetries=" + zkSleepMsBetweenRetries +
+                ", zkIgnoreBinLogPosition=" + zkIgnoreBinLogPosition +
+                '}';
+    }
 }

@@ -61,4 +61,13 @@ public class MySqlSpoutConfig implements Serializable {
     public FailureConfig getFailureConfig() {
         return failureConfig;
     }
+
+    @Override
+    public String toString() {
+        return "MySqlSpoutConfig{" +
+                "mysqlConfig=" + mysqlConfig +
+                ", zkBinLogStateConfig=" + zkBinLogStateConfig +
+                ", failureConfig=" + failureConfig +
+                '}';
+    }
 }

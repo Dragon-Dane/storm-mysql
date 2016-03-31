@@ -61,4 +61,13 @@ public class FailureConfig implements Serializable {
     public SidelineStrategy getSidelineStrategy() {
         return sidelineStrategy;
     }
+
+    @Override
+    public String toString() {
+        return "FailureConfig{" +
+                "numMaxRetries=" + numMaxRetries +
+                ", numMaxTotalFailAllowed=" + numMaxTotalFailAllowed +
+                ", sidelineStrategy=" + sidelineStrategy +
+                '}';
+    }
 }
