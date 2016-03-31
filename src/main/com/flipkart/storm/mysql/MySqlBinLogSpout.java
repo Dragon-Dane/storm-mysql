@@ -194,7 +194,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
     @Override
     public void ack(Object msgId) {
-        LOGGER.debug("Acking For... {}", msgId);
+        LOGGER.trace("Acking For... {}", msgId);
         long scn = (Long) msgId;
         this.pendingMessagesToBeAcked.remove(scn);
         this.failureMessages.remove(scn);
@@ -204,7 +204,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
     @Override
     public void fail(Object msgId) {
-        LOGGER.debug("Failing For... {}", msgId);
+        LOGGER.trace("Failing For... {}", msgId);
         int numFailures = this.failureMessages.size();
         if (numFailures >= this.spoutConfig.getFailureConfig().getNumMaxTotalFailAllowed()) {
             throw new RuntimeException("Failure count greater than configured allowed failures...Stopping");
@@ -237,7 +237,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         long offset = (pendingMessagesToBeAcked.isEmpty()) ? this.lastEmittedBeginTxPosition.getSCN() :
                                                              pendingMessagesToBeAcked.firstKey();
         if (currentCommittedOffsetInZk != offset) {
-            LOGGER.debug("Updating ZK with offset {} for topology: {} with Id: {}",
+            LOGGER.trace("Updating ZK with offset {} for topology: {} with Id: {}",
                                                     offset, this.topologyName, this.topologyInstanceId);
             OffsetInfo offsetInfo = null;
             if (pendingMessagesToBeAcked.isEmpty()) {
@@ -264,7 +264,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
                                                             this.spoutConfig.getZkBinLogStateConfig().getZkScnCommitPath(),
                                                             offset, topologyName, topologyInstanceId);
         } else {
-            LOGGER.debug("No update in ZK for offset {}", offset);
+            LOGGER.trace("No update in ZK for offset {}", offset);
         }
     }
 
