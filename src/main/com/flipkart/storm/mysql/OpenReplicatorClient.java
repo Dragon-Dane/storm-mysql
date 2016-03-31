@@ -64,6 +64,7 @@ public class OpenReplicatorClient {
         this.openReplicator.setPassword(mySqlConfig.getPassword());
         this.openReplicator.setServerId(mySqlConfig.getServerId());
         this.openReplicator.setPort(mySqlConfig.getPort());
+        this.openReplicator.setHost(mySqlConfig.getHost());
 
         BinLogPosition binLogPosition = getBinLogPositionToStartFrom(mySqlConfig, zkConfig);
         this.openReplicator.setBinlogPosition(binLogPosition.getBinLogPosition());
