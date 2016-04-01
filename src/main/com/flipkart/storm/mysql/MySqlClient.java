@@ -76,10 +76,7 @@ public class MySqlClient {
 
             RowInfo rowInfo = new RowInfo(columnInfoList);
             TableInfo tableInfo = new TableInfo(tableName, rowInfo);
-            //Converting to lowercase cause open replicator seems to return
-            //all bin log events with tables in lowercase. The comparison for
-            //filtering events works correctly then.
-            tableSchemas.put(tableName.toLowerCase(), tableInfo);
+            tableSchemas.put(tableName, tableInfo);
         }
         return new DatabaseInfo(databaseName, tableSchemas);
     }

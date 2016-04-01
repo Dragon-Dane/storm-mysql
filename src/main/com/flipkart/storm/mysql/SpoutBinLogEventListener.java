@@ -103,6 +103,8 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
     @Override
     public void onEvents(BinlogEventV4 event) {
 
+        LOGGER.trace("Received bin log event {}", event);
+
         String tableName = "";
         switch (event.getHeader().getEventType()) {
             case MySQLConstants.WRITE_ROWS_EVENT:
