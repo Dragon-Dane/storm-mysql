@@ -139,6 +139,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         RetryTransactionEvent txRetrEvent = null;
+        boolean failureCase = false;
         if (this.failureMessages.isEmpty()) {
 
             TransactionEvent txEvent = this.txQueue.poll();
@@ -150,6 +151,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
             long failedScn = this.failureMessages.firstKey();
             txRetrEvent = this.pendingMessagesToBeAcked.get(failedScn);
             if (txRetrEvent != null) {
+                failureCase = true;
                 if (txRetrEvent.getNumRetries() >= this.spoutConfig.getFailureConfig().getNumMaxRetries()) {
                         this.spoutConfig.getFailureConfig().getSidelineStrategy().sideline(txRetrEvent.getTxEvent());
                         this.failureMessages.remove(failedScn);
@@ -169,13 +171,16 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
         try {
             if (txRetrEvent != null) {
-                LOGGER.debug("Received Tx Event in Spout...{}", txRetrEvent);
+                
                 TransactionEvent txEvent = txRetrEvent.getTxEvent();
                 this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
-                    String txJson = MAPPER.writeValueAsString(txEvent);
-                    BinLogPosition binLogPosition = new BinLogPosition(txEvent.getBinLogPosition(),
-                                                                       txEvent.getBinLogFileName());
+                String txJson = MAPPER.writeValueAsString(txEvent);
+                BinLogPosition binLogPosition = new BinLogPosition(txEvent.getBinLogPosition(),
+                                                                   txEvent.getBinLogFileName());
                 long scn = binLogPosition.getSCN();
+                if (failureCase) {
+                    LOGGER.info("Received Tx Event Scn {} Tx {}", scn, txRetrEvent);
+                }
                 this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
                 this.lastEmittedBeginTxPosition = binLogPosition;
                 collector.emit(new Values(txEvent.getDatabaseName(), txJson), scn);
@@ -239,7 +244,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
                                                              pendingMessagesToBeAcked.firstKey();
         if (currentCommittedOffsetInZk != offset) {
             LOGGER.trace("Updating ZK with offset {} for topology: {} with Id: {}",
-                                                    offset, this.topologyName, this.topologyInstanceId);
+                    offset, this.topologyName, this.topologyInstanceId);
             OffsetInfo offsetInfo = null;
             if (pendingMessagesToBeAcked.isEmpty()) {
                 offsetInfo = new OffsetInfo(offset,
