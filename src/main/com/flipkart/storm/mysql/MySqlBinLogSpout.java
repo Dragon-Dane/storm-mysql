@@ -156,7 +156,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
                         this.pendingMessagesToBeAcked.remove(failedScn);
                         this.msgSidelineCount++;
                         this.sidelineCountMetric.setValue(this.msgSidelineCount);
-                        LOGGER.info("Sidelining message id .... {}", failedScn);
+                        LOGGER.info("Sidelining SCN = {} Tx = {}", failedScn, txRetrEvent);
                         txRetrEvent = null;
                 } else {
                     txRetrEvent = new RetryTransactionEvent(txRetrEvent.getTxEvent(), txRetrEvent.getNumRetries() + 1);
@@ -205,7 +205,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
     @Override
     public void fail(Object msgId) {
-        LOGGER.trace("Failing For... {}", msgId);
+        LOGGER.info("Failing For... {}", msgId);
         int numFailures = this.failureMessages.size();
         if (numFailures >= this.spoutConfig.getFailureConfig().getNumMaxTotalFailAllowed()) {
             throw new RuntimeException("Failure count greater than configured allowed failures...Stopping");
