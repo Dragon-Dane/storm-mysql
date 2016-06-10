@@ -23,16 +23,19 @@ public class RetryTransactionEvent {
 
     private final TransactionEvent  txEvent;
     private final int               numRetries;
+    private final long              timeWhenEmitted;
 
     /**
      * Instatiate a transaction event with the number of retries already done.
      *
      * @param txEvent the transaction event
      * @param numRetries the num retries
+     * @param timeWhenEmitted time when this event was emitted from then spout.
      */
-    public RetryTransactionEvent(TransactionEvent txEvent, int numRetries) {
+    public RetryTransactionEvent(TransactionEvent txEvent, int numRetries, long timeWhenEmitted) {
         this.txEvent    = txEvent;
         this.numRetries = numRetries;
+        this.timeWhenEmitted = timeWhenEmitted;
     }
 
     public TransactionEvent getTxEvent() {
@@ -43,11 +46,14 @@ public class RetryTransactionEvent {
         return numRetries;
     }
 
+    public long getTimeWhenEmitted() { return timeWhenEmitted; }
+
     @Override
     public String toString() {
         return "RetryTransactionEvent{" +
                 "txEvent=" + txEvent +
                 ", numRetries=" + numRetries +
+                ", timeWhenEmitted=" + timeWhenEmitted +
                 '}';
     }
 }

@@ -26,6 +26,7 @@ public class MySqlSpoutConfig implements Serializable {
     private final MySqlConfig           mysqlConfig;
     private final ZkBinLogStateConfig   zkBinLogStateConfig;
     private final FailureConfig         failureConfig;
+    private final int                   metricsTimeBucketSizeInSecs;
 
     /**
      * Initialize a spout configuration without sidelining.
@@ -34,7 +35,20 @@ public class MySqlSpoutConfig implements Serializable {
      */
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig) {
         this (mysqlConfig, zkBinLogStateConfig,
-              new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED));
+              new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED),
+              SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+    }
+
+    /**
+     * Initialize a spout configuration with sidelining.
+     * @param mysqlConfig mysql configuration.
+     * @param zkBinLogStateConfig zookeeper configuration.
+     * @param metricsTimeBucketSizeInSecs time in which the metrics will be sent to the consumer
+     */
+    public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig, int metricsTimeBucketSizeInSecs) {
+        this (mysqlConfig, zkBinLogStateConfig,
+                new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED),
+                metricsTimeBucketSizeInSecs);
     }
 
     /**
@@ -42,12 +56,14 @@ public class MySqlSpoutConfig implements Serializable {
      * @param mysqlConfig mysql configuration.
      * @param zkBinLogStateConfig zookeeper configuration.
      * @param failureConfig failure configuration(sidelining)
+     * @param metricsTimeBucketSizeInSecs time in which the metrics will be sent to the consumer
      */
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig,
-                            FailureConfig failureConfig) {
+                            FailureConfig failureConfig, int metricsTimeBucketSizeInSecs) {
         this.mysqlConfig = mysqlConfig;
         this.zkBinLogStateConfig = zkBinLogStateConfig;
         this.failureConfig = failureConfig;
+        this.metricsTimeBucketSizeInSecs = metricsTimeBucketSizeInSecs;
     }
 
     public MySqlConfig getMysqlConfig() {
@@ -62,12 +78,17 @@ public class MySqlSpoutConfig implements Serializable {
         return failureConfig;
     }
 
+    public int getMetricsTimeBucketSizeInSecs() {
+        return metricsTimeBucketSizeInSecs;
+    }
+
     @Override
     public String toString() {
         return "MySqlSpoutConfig{" +
                 "mysqlConfig=" + mysqlConfig +
                 ", zkBinLogStateConfig=" + zkBinLogStateConfig +
                 ", failureConfig=" + failureConfig +
+                ", metricsTimeBucketSizeInSecs=" + metricsTimeBucketSizeInSecs +
                 '}';
     }
 }

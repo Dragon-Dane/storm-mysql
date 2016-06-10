@@ -231,7 +231,10 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         .txTimeEnd(System.nanoTime())
                                                         .txId(xidEvent.getXid())
                                                         .build();
-                    this.queue.offer(txEvent);
+                    boolean success = false;
+                    do {
+                        success = this.queue.offer(txEvent);
+                    } while (!success);
                 }
                 txBuilder.reset();
                 break;

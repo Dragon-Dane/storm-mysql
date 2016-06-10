@@ -243,12 +243,10 @@ public final class TransactionEvent {
         return dataEvents;
     }
 
-    @JsonIgnore
     public int getBinLogPosition() {
         return binLogPosition;
     }
 
-    @JsonIgnore
     public String getBinLogFileName() {
         return binLogFileName;
     }

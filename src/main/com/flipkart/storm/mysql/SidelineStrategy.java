@@ -16,7 +16,10 @@
 
 package com.flipkart.storm.mysql;
 
+import backtype.storm.task.TopologyContext;
+
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * The interface for hooking up sideline strategies.
@@ -31,4 +34,13 @@ public interface SidelineStrategy extends Serializable {
      * @param txEvent the transaction event
      */
     void sideline(TransactionEvent txEvent);
+
+    /**
+     * This function should be used to initialize all member variables.
+     * Do not use the constructor.
+     *
+     * @param conf the configuration
+     * @param context the topology context
+     */
+    void initialize(Map conf, TopologyContext context);
 }

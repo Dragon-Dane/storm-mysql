@@ -88,7 +88,7 @@ public final class SpoutConstants {
     /**
      * Metrics to be calculated at this default bucket size.
      */
-    public static final int    DEFAULT_TIMEBUCKETSIZEINSECS = 30;
+    public static final int    DEFAULT_TIMEBUCKETSIZEINSECS = 60;
 
     /**
      * Metrics for failure count.
@@ -109,6 +109,31 @@ public final class SpoutConstants {
      * Metrics for transaction process time.
      */
     public static final String METRIC_TXPROCESSTIME         = "tx_process_mean";
+
+    /**
+     * Metrics for failure messages, time in topology.
+     */
+    public static final String METRIC_FAIL_MSG_IN_TOPOLOGY  = "tx_fail_topology_mean";
+
+    /**
+     * Metrics for the internal buffer size.
+     */
+    public static final String METRIC_BUFFER_SIZE           = "internal_buffer_size";
+
+    /**
+     * Metrics for pending messages.
+     */
+    public static final String METRIC_PENDING_MESSAGES      = "pending_message_count";
+
+    /**
+     * Metrics for Current Bin Log File Number emitted.
+     */
+    public static final String METRIC_BINLOG_FILE_NUM           = "emit_binlog_file_number";
+
+    /**
+     * Metrics for Current Bin Log File Position.
+     */
+    public static final String METRIC_BIN_LOG_FILE_POS          = "emit_binlog_file_pos";
 
     /**
      * The default time the spout retries an transaction event, before sidelining.

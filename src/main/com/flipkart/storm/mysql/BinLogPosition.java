@@ -51,7 +51,7 @@ public class BinLogPosition {
         return scn;
     }
 
-    private int extractFileNumber(String mysqlBinLogFileName) {
+    public static int extractFileNumber(String mysqlBinLogFileName) {
         String[] split = mysqlBinLogFileName.split("\\.");
         return Integer.parseInt(split[split.length - 1]);
     }

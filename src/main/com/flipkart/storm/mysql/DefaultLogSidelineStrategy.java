@@ -16,8 +16,11 @@
 
 package com.flipkart.storm.mysql;
 
+import backtype.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * The default log sideline strategy.
@@ -34,5 +37,15 @@ public class DefaultLogSidelineStrategy implements SidelineStrategy {
      */
     public void sideline(TransactionEvent transactionEvent) {
         LOGGER.error("Sideline : {}", transactionEvent.toString());
+    }
+
+    /**
+     * Initialize members.
+     *
+     * @param conf the configuration
+     * @param context the topology context
+     */
+    public void initialize(Map conf, TopologyContext context) {
+        //No initialization required here.....
     }
 }

@@ -17,7 +17,8 @@
 package com.flipkart.storm.mysql;
 
 import backtype.storm.Config;
-import backtype.storm.metric.api.AssignableMetric;
+import backtype.storm.metric.api.CombinedMetric;
+import backtype.storm.metric.api.CountMetric;
 import backtype.storm.metric.api.MeanReducer;
 import backtype.storm.metric.api.ReducedMetric;
 import backtype.storm.spout.SpoutOutputCollector;
@@ -45,9 +46,6 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     public static final Logger  LOGGER                     = LoggerFactory.getLogger(MySqlBinLogSpout.class);
 
     private static final ObjectMapper MAPPER               = new ObjectMapper();
-    private long                msgAckCount                = 0;
-    private long                msgSidelineCount           = 0;
-    private long                msgFailedCount             = 0;
     private long                currentCommittedOffsetInZk = -1;
     private String              databaseName               = null;
 
@@ -60,11 +58,17 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private SpoutOutputCollector    collector;
     private long                    zkLastUpdateMs;
     private ClientFactory           clientFactory;
+    private SidelineStrategy        sidelineStrategy;
 
-    private AssignableMetric failureCountMetric;
-    private AssignableMetric sidelineCountMetric;
-    private AssignableMetric successCountMetric;
-    private ReducedMetric    txEventProcessTime;
+    private CombinedMetric      failureMetric;
+    private CountMetric         sidelineCountMetric;
+    private CountMetric         successCountMetric;
+    private CombinedMetric      internalBufferSize;
+    private CombinedMetric      pendingMessageSize;
+    private CombinedMetric      currentBinLogFileNumber;
+    private CombinedMetric      currentBinLogFilePosition;
+    private ReducedMetric       txEventFailTimeInTopology;
+    private ReducedMetric       txEventProcessTime;
 
     BinLogPosition  lastEmittedBeginTxPosition = null;
     SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
@@ -108,8 +112,10 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         this.topologyInstanceId = context.getStormId();
         this.topologyName       = conf.get(Config.TOPOLOGY_NAME).toString();
         this.databaseName       = this.spoutConfig.getMysqlConfig().getDatabase();
+        this.sidelineStrategy   = this.spoutConfig.getFailureConfig().getSidelineStrategy();
+        this.sidelineStrategy.initialize(conf, context);
 
-        initializeAndRegisterAllMetrics(context);
+        initializeAndRegisterAllMetrics(context, this.spoutConfig.getMetricsTimeBucketSizeInSecs());
 
         zkClient = this.clientFactory.getZkClient(conf, this.spoutConfig.getZkBinLogStateConfig());
         mySqlClient = this.clientFactory.getMySqlClient(this.spoutConfig.getMysqlConfig());
@@ -139,53 +145,54 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     @Override
     public void nextTuple() {
         RetryTransactionEvent txRetrEvent = null;
-        boolean failureCase = false;
         if (this.failureMessages.isEmpty()) {
 
             TransactionEvent txEvent = this.txQueue.poll();
             if (txEvent != null) {
-                txRetrEvent = new RetryTransactionEvent(txEvent, 1);
+                txRetrEvent = new RetryTransactionEvent(txEvent, 1, System.currentTimeMillis());
             }
         } else {
 
             long failedScn = this.failureMessages.firstKey();
             txRetrEvent = this.pendingMessagesToBeAcked.get(failedScn);
             if (txRetrEvent != null) {
-                failureCase = true;
                 if (txRetrEvent.getNumRetries() >= this.spoutConfig.getFailureConfig().getNumMaxRetries()) {
-                        this.spoutConfig.getFailureConfig().getSidelineStrategy().sideline(txRetrEvent.getTxEvent());
+                        this.sidelineStrategy.sideline(txRetrEvent.getTxEvent());
                         this.failureMessages.remove(failedScn);
                         this.pendingMessagesToBeAcked.remove(failedScn);
-                        this.msgSidelineCount++;
-                        this.sidelineCountMetric.setValue(this.msgSidelineCount);
+                        this.sidelineCountMetric.incr();
                         LOGGER.info("Sidelining SCN = {} Tx = {}", failedScn, txRetrEvent);
                         txRetrEvent = null;
                 } else {
-                    txRetrEvent = new RetryTransactionEvent(txRetrEvent.getTxEvent(), txRetrEvent.getNumRetries() + 1);
+                    txRetrEvent = new RetryTransactionEvent(txRetrEvent.getTxEvent(), txRetrEvent.getNumRetries() + 1,
+                                                            System.currentTimeMillis());
                 }
             } else {
                 //Nothing was pending it seems... Remove from failure
                 this.failureMessages.remove(failedScn);
+                this.failureMetric.update(this.failureMessages.size());
             }
         }
 
         try {
             if (txRetrEvent != null) {
-                
+
                 TransactionEvent txEvent = txRetrEvent.getTxEvent();
-                this.txEventProcessTime.update(txEvent.getEndTimeInNanos() - txEvent.getStartTimeInNanos());
+                this.txEventProcessTime.update(System.currentTimeMillis() - ( txEvent.getStartTimeInNanos() / 1000000 ));
                 String txJson = MAPPER.writeValueAsString(txEvent);
                 BinLogPosition binLogPosition = new BinLogPosition(txEvent.getBinLogPosition(),
                                                                    txEvent.getBinLogFileName());
                 long scn = binLogPosition.getSCN();
-                if (failureCase) {
-                    LOGGER.info("Received Tx Event Scn {} Tx {}", scn, txRetrEvent);
-                }
+                LOGGER.debug("Message Scn {} Tx {}", scn, txRetrEvent);
                 this.pendingMessagesToBeAcked.put(scn, txRetrEvent);
                 this.lastEmittedBeginTxPosition = binLogPosition;
                 collector.emit(new Values(txEvent.getDatabaseName(), txJson), scn);
+                this.currentBinLogFilePosition.update(txEvent.getBinLogPosition());
+                this.currentBinLogFileNumber.update(BinLogPosition.extractFileNumber(txEvent.getBinLogFileName()));
             }
 
+            this.internalBufferSize.update(this.txQueue.size());
+            this.pendingMessageSize.update(this.pendingMessagesToBeAcked.size());
             long diffWithNow = System.currentTimeMillis() - zkLastUpdateMs;
             if (diffWithNow > this.spoutConfig.getZkBinLogStateConfig().getZkScnUpdateRateInMs() || diffWithNow < 0) {
                     commit();
@@ -200,25 +207,31 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
     @Override
     public void ack(Object msgId) {
-        LOGGER.trace("Acking For... {}", msgId);
+        LOGGER.trace("Acking For... {} Current TimeInMillis since epoch {}", msgId, System.currentTimeMillis());
         long scn = (Long) msgId;
         this.pendingMessagesToBeAcked.remove(scn);
         this.failureMessages.remove(scn);
-        this.msgAckCount++;
-        this.successCountMetric.setValue(this.msgAckCount);
+        this.failureMetric.update(this.failureMessages.size());
+        this.successCountMetric.incr();
+        this.pendingMessageSize.update(this.pendingMessagesToBeAcked.size());
     }
 
     @Override
     public void fail(Object msgId) {
-        LOGGER.info("Failing For... {}", msgId);
+        LOGGER.info("Failing For... {} Current TimeInMillis since epoch {}", msgId, System.currentTimeMillis());
         int numFailures = this.failureMessages.size();
         if (numFailures >= this.spoutConfig.getFailureConfig().getNumMaxTotalFailAllowed()) {
             throw new RuntimeException("Failure count greater than configured allowed failures...Stopping");
         }
         long scn = (Long) msgId;
-        this.failureMessages.put(scn, System.currentTimeMillis());
-        this.msgFailedCount++;
-        this.failureCountMetric.setValue(this.msgFailedCount);
+        RetryTransactionEvent event = this.pendingMessagesToBeAcked.get(scn);
+        if (event != null) {
+            this.txEventFailTimeInTopology.update(System.currentTimeMillis() - event.getTimeWhenEmitted());
+            this.failureMessages.put(scn, System.currentTimeMillis());
+            this.failureMetric.update(this.failureMessages.size());
+        } else {
+            LOGGER.warn("Failures happening for seemingly non-existent tuples...");
+        }
     }
 
     @Override
@@ -274,20 +287,27 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         }
     }
 
-    private void initializeAndRegisterAllMetrics(TopologyContext context) {
-        this.failureCountMetric     = new AssignableMetric(this.msgFailedCount);
-        this.successCountMetric     = new AssignableMetric(this.msgAckCount);
-        this.sidelineCountMetric    = new AssignableMetric(this.msgSidelineCount);
-        this.txEventProcessTime     = new ReducedMetric(new MeanReducer());
+    private void initializeAndRegisterAllMetrics(TopologyContext context, int timeBucketSize) {
+        this.failureMetric                  = new CombinedMetric(new MaxMetric());
+        this.successCountMetric             = new CountMetric();
+        this.sidelineCountMetric            = new CountMetric();
+        this.internalBufferSize             = new CombinedMetric(new MaxMetric());
+        this.pendingMessageSize             = new CombinedMetric(new MaxMetric());
+        this.currentBinLogFileNumber        = new CombinedMetric(new MaxMetric());
+        this.currentBinLogFilePosition      = new CombinedMetric(new MaxMetric());
+        this.txEventProcessTime             = new ReducedMetric(new MeanReducer());
+        this.txEventFailTimeInTopology      = new ReducedMetric(new MeanReducer());
 
-        context.registerMetric(SpoutConstants.METRIC_FAILURECOUNT, this.failureCountMetric,
-                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_SUCCESSCOUNT, this.successCountMetric,
-                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_SIDELINECOUNT, this.sidelineCountMetric,
-                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
-        context.registerMetric(SpoutConstants.METRIC_TXPROCESSTIME, this.txEventProcessTime,
-                               SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+        context.registerMetric(SpoutConstants.METRIC_FAILURECOUNT, this.failureMetric, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_SUCCESSCOUNT, this.successCountMetric, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_SIDELINECOUNT, this.sidelineCountMetric, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_BUFFER_SIZE, this.internalBufferSize, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_PENDING_MESSAGES, this.pendingMessageSize, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_TXPROCESSTIME, this.txEventProcessTime, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_BINLOG_FILE_NUM, this.currentBinLogFileNumber, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_BIN_LOG_FILE_POS, this.currentBinLogFilePosition, timeBucketSize);
+        context.registerMetric(SpoutConstants.METRIC_FAIL_MSG_IN_TOPOLOGY, this.txEventFailTimeInTopology, timeBucketSize);
+
     }
 }
 
