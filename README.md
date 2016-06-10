@@ -384,6 +384,10 @@ FailureConfig failureConfig = new FailureConfig(10, 1000000, new SidelineStrateg
                 public void sideline(TransactionEvent txEvent) {
                     log.error(txEvent.toString());
                 }
+                @Override
+                public void initialize(Map conf, TopologyContext topologyContext) {
+                    //Initialization
+                }
             });
 
 
