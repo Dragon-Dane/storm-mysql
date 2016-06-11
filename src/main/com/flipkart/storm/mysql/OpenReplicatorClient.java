@@ -151,7 +151,7 @@ public class OpenReplicatorClient {
      */
     public void close() {
         try {
-            openReplicator.stop(1, TimeUnit.SECONDS);
+            openReplicator.stop(100, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

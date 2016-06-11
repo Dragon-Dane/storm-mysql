@@ -71,8 +71,8 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     private ReducedMetric       txEventProcessTime;
 
     BinLogPosition  lastEmittedBeginTxPosition = null;
+    LinkedBlockingQueue<TransactionEvent>   txQueue;
     SortedMap<Long, Long>                   failureMessages           = new TreeMap<Long, Long>();
-    LinkedBlockingQueue<TransactionEvent>   txQueue                   = new LinkedBlockingQueue<TransactionEvent>();
     SortedMap<Long, RetryTransactionEvent>  pendingMessagesToBeAcked  = new TreeMap<Long, RetryTransactionEvent>();
 
 
@@ -117,6 +117,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
 
         initializeAndRegisterAllMetrics(context, this.spoutConfig.getMetricsTimeBucketSizeInSecs());
 
+        txQueue = this.clientFactory.initializeBuffer(this.spoutConfig.getBufferCapacity());
         zkClient = this.clientFactory.getZkClient(conf, this.spoutConfig.getZkBinLogStateConfig());
         mySqlClient = this.clientFactory.getMySqlClient(this.spoutConfig.getMysqlConfig());
         openReplicatorClient = this.clientFactory.getReplicatorClient(mySqlClient, zkClient);
@@ -237,6 +238,10 @@ public class MySqlBinLogSpout extends BaseRichSpout {
     @Override
     public void deactivate() {
         commit();
+        //Release everything... Implement a activate later maybe.
+        //Should be immediately followed by a 'kill topology'.
+        //TODO: A shutdown hook or implement IWorkerHook in the new versions.
+        close();
     }
 
     /**
@@ -309,6 +314,7 @@ public class MySqlBinLogSpout extends BaseRichSpout {
         context.registerMetric(SpoutConstants.METRIC_FAIL_MSG_IN_TOPOLOGY, this.txEventFailTimeInTopology, timeBucketSize);
 
     }
+
 }
 
 

@@ -432,7 +432,31 @@ Add the following to the <repositories> section in your pom.xml:
     </repository>
 </repositories>
 ```
-    
+
+## Metrics
+
+Currently the spout pushes the following metrics:
+
+        Failure Count  : "failure_count"  -> The Max count reported in the metric time bucket size.  
+        Success Count  : "success_count"  -> Number of success acks in the metric time bucket size.
+        SideLine Count : "sideline_count" -> Number of tuples sidelined in the metric time bucket size.
+
+        TxProcess Time : "tx_process_mean" -> The time in ms, from bin log read, to tuple emit. An indicator of how much time the
+                         message was in the internal buffer. The mean of all data points in the metric bucket size specified.
+        TxFail Time    : "tx_fail_topology_mean" -> The time in ms, from the time it was emitted to the time it failed. Can be used as
+                         an indicator of too many tuple timeouts happening. The mean of all data points in the metric bucket size specified.
+                        
+        Internal Buffer Size  : "internal_buffer_size"  -> The occupied size of the internal buffer. The Max in the bucket slice.
+        Pending Message Count : "pending_message_count" -> Tuples which have been emitted but not yet acked.
+        
+        BinLog File Number   : "emit_binlog_file_number" -> The max file number of the bin log file parsed.
+        BinLog File Position : "emit_binlog_file_pos:    -> The max bin log position emitted in the metric time slice.
+
+A `IMetricConsumer` can be implemented to read these metrics.
+
+For a Consumer Example follow this link [Metric.md](https://github.com/flipkart-incubator/storm-mysql/blob/master/METRIC.md)
+
+
 ##Limitations
 
 Currently tested ONLY with tables created with InnoDB storage engine.
@@ -474,6 +498,8 @@ Not Supported
     
 If table schema is changed, or if a table is added that needs bin log tailing the topology would
 have to be re-submitted.
+
+It is also recommended to deactivate the topology before killing it. But haven't yet faced any problems in not doing so.
   
 ##Committers
 

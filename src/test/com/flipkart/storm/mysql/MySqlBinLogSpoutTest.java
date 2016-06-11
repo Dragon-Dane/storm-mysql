@@ -38,6 +38,7 @@ public class MySqlBinLogSpoutTest {
     private Map<String, Object>     mockStormConfig;
     private TopologyContext         mockTopologyContext;
     private SpoutOutputCollector    mockSpoutOutputCollector;
+    private LinkedBlockingQueue     internalBuffer;
 
     private MySqlClient             mockMySqlClient;
     private ZkClient                mockZkClient;
@@ -53,6 +54,7 @@ public class MySqlBinLogSpoutTest {
         mockStormConfig = Mockito.mock(Map.class);
         mockTopologyContext = Mockito.mock(TopologyContext.class);
         mockSpoutOutputCollector = Mockito.mock(SpoutOutputCollector.class);
+        internalBuffer = new LinkedBlockingQueue();
 
         mockMySqlClient = Mockito.mock(MySqlClient.class);
         mockZkClient = Mockito.mock(ZkClient.class);
@@ -83,7 +85,8 @@ public class MySqlBinLogSpoutTest {
         when(mockClientFactory.getMySqlClient(mySqlConfig)).thenReturn(mockMySqlClient);
         when(mockClientFactory.getZkClient(mockStormConfig, zkBinLogStateConfig)).thenReturn(mockZkClient);
         when(mockClientFactory.getReplicatorClient(mockMySqlClient, mockZkClient)).thenReturn(mockOpenReplicatorClient);
-        when(mockOpenReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, spout.txQueue))
+        when(mockClientFactory.initializeBuffer(any(Integer.class))).thenReturn(internalBuffer);
+        when(mockOpenReplicatorClient.initialize(mySqlConfig, zkBinLogStateConfig, internalBuffer))
                                      .thenReturn(new BinLogPosition(1121, "mysql-bin2"));
 
         spout.open(mockStormConfig, mockTopologyContext, mockSpoutOutputCollector);

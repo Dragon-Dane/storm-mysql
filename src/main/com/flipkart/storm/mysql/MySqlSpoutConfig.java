@@ -27,6 +27,7 @@ public class MySqlSpoutConfig implements Serializable {
     private final ZkBinLogStateConfig   zkBinLogStateConfig;
     private final FailureConfig         failureConfig;
     private final int                   metricsTimeBucketSizeInSecs;
+    private final int                   bufferCapacity;
 
     /**
      * Initialize a spout configuration without sidelining.
@@ -36,7 +37,7 @@ public class MySqlSpoutConfig implements Serializable {
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig) {
         this (mysqlConfig, zkBinLogStateConfig,
               new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED),
-              SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS);
+              SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS, SpoutConstants.DEFAULT_BUFFER_CAPACITY);
     }
 
     /**
@@ -48,7 +49,19 @@ public class MySqlSpoutConfig implements Serializable {
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig, int metricsTimeBucketSizeInSecs) {
         this (mysqlConfig, zkBinLogStateConfig,
                 new FailureConfig(SpoutConstants.DEFAULT_NUMMAXRETRIES, SpoutConstants.DEFAULT_NUMMAXTOTFAILALLOWED),
-                metricsTimeBucketSizeInSecs);
+                metricsTimeBucketSizeInSecs, SpoutConstants.DEFAULT_BUFFER_CAPACITY);
+    }
+
+    /**
+     * Initialize a spout configuration with sidelining.
+     * @param mysqlConfig mysql configuration.
+     * @param zkBinLogStateConfig zookeeper configuration.
+     * @param failureConfig failure configuration(sidelining)
+     */
+    public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig,
+                            FailureConfig failureConfig) {
+        this (mysqlConfig, zkBinLogStateConfig, failureConfig,
+                SpoutConstants.DEFAULT_TIMEBUCKETSIZEINSECS, SpoutConstants.DEFAULT_BUFFER_CAPACITY);
     }
 
     /**
@@ -57,13 +70,16 @@ public class MySqlSpoutConfig implements Serializable {
      * @param zkBinLogStateConfig zookeeper configuration.
      * @param failureConfig failure configuration(sidelining)
      * @param metricsTimeBucketSizeInSecs time in which the metrics will be sent to the consumer
+     * @param bufferCapacity the capacity of the internal queue..
      */
     public MySqlSpoutConfig(MySqlConfig mysqlConfig, ZkBinLogStateConfig zkBinLogStateConfig,
-                            FailureConfig failureConfig, int metricsTimeBucketSizeInSecs) {
+                            FailureConfig failureConfig, int metricsTimeBucketSizeInSecs,
+                            int bufferCapacity) {
         this.mysqlConfig = mysqlConfig;
         this.zkBinLogStateConfig = zkBinLogStateConfig;
         this.failureConfig = failureConfig;
         this.metricsTimeBucketSizeInSecs = metricsTimeBucketSizeInSecs;
+        this.bufferCapacity = bufferCapacity;
     }
 
     public MySqlConfig getMysqlConfig() {
@@ -82,6 +98,10 @@ public class MySqlSpoutConfig implements Serializable {
         return metricsTimeBucketSizeInSecs;
     }
 
+    public int getBufferCapacity() {
+        return bufferCapacity;
+    }
+
     @Override
     public String toString() {
         return "MySqlSpoutConfig{" +
@@ -89,6 +109,7 @@ public class MySqlSpoutConfig implements Serializable {
                 ", zkBinLogStateConfig=" + zkBinLogStateConfig +
                 ", failureConfig=" + failureConfig +
                 ", metricsTimeBucketSizeInSecs=" + metricsTimeBucketSizeInSecs +
+                ", bufferCapacity=" + bufferCapacity +
                 '}';
     }
 }

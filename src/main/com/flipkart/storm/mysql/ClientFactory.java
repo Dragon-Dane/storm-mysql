@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This factory is responsible for creating the all external clients. (Zk/Mysql/OR)
@@ -60,5 +61,15 @@ public class ClientFactory implements Serializable {
         Preconditions.checkNotNull(mySqlClient, "Mysql Client cannot be null");
         Preconditions.checkNotNull(zkClient, "Zookeeper Client cannot be null");
         return new OpenReplicatorClient(mySqlClient, zkClient);
+    }
+
+    /**
+     * Get the Internal Buffer.
+     *
+     * @param capacity the initial buffer size
+     * @return the new buffer
+     */
+    public LinkedBlockingQueue initializeBuffer(int capacity) {
+        return new LinkedBlockingQueue<TransactionEvent>(capacity);
     }
 }

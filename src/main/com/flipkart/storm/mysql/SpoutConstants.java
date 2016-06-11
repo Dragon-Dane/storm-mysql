@@ -91,6 +91,11 @@ public final class SpoutConstants {
     public static final int    DEFAULT_TIMEBUCKETSIZEINSECS = 60;
 
     /**
+     * The buffer capacity of the internal queue..
+     */
+    public static final int    DEFAULT_BUFFER_CAPACITY = 100000;
+
+    /**
      * Metrics for failure count.
      */
     public static final String METRIC_FAILURECOUNT          = "failure_count";
@@ -128,7 +133,7 @@ public final class SpoutConstants {
     /**
      * Metrics for Current Bin Log File Number emitted.
      */
-    public static final String METRIC_BINLOG_FILE_NUM           = "emit_binlog_file_number";
+    public static final String METRIC_BINLOG_FILE_NUM       = "emit_binlog_file_number";
 
     /**
      * Metrics for Current Bin Log File Position.
