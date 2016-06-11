@@ -1,9 +1,8 @@
-A MySql Spout Metric Consumer Example
-===========================
+##A MySql Spout Metric Consumer Example
 
-##This example uses Codahale Metrics library and pushes to Jmx.
+####This example uses Codahale Metrics library and pushes to Jmx.
 
-###Create a Registry
+####Create a Registry
 
 ```java
 
@@ -39,7 +38,7 @@ public class MetricsUtil {
 }
 ```
 
-###Now a Consumer
+####Now a Consumer
 
 ```java
 
