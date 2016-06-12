@@ -65,7 +65,7 @@ public class MySqlSpoutMetricConsumer implements IMetricsConsumer {
 
     @Override
     public void handleDataPoints(TaskInfo taskInfo, Collection<DataPoint> dataPoints) {
-        if (taskInfo.srcComponentId.equals(ServiceBooter.MYSQl_SPOUT_COMPONENT)) {
+        if (taskInfo.srcComponentId.equals("mysqlspout")) {
             for (DataPoint p : dataPoints) {
                 LOG.info("Mysql Spout Metric Consumer Data Point--->" +p.toString());
                 switch(p.name) {
