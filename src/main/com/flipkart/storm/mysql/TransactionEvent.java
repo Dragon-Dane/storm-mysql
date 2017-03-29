@@ -210,6 +210,20 @@ public final class TransactionEvent {
             return txEvent;
         }
 
+        @Override
+        public String toString() {
+            return "Builder{" +
+                    "innerDataBaseName='" + innerDataBaseName + '\'' +
+                    ", innerServerId=" + innerServerId +
+                    ", innerBinLogPos=" + innerBinLogPos +
+                    ", innerBinLogFileName='" + innerBinLogFileName + '\'' +
+                    ", innerTxId=" + innerTxId +
+                    ", innerStartTimeInNanos=" + innerStartTimeInNanos +
+                    ", innerEndTimeInNanos=" + innerEndTimeInNanos +
+                    ", innerTxState=" + innerTxState +
+                    ", innerDataEventList=" + innerDataEventList +
+                    '}';
+        }
     }
 
     private TransactionEvent(Builder builder) {

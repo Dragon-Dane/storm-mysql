@@ -27,7 +27,7 @@ public enum StringConverter implements Converter {
 
     @Override
     public Object convert(ColumnDataType columnDataType, Object value) {
-        if (value instanceof String) {
+        if (value == null || value instanceof String) {
             return value;
         }
         return new String((byte[]) value);

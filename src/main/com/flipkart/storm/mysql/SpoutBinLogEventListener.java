@@ -125,6 +125,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, writeRowsEvent.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Write Rows Event ... {}", txBuilder);
                 break;
 
             case MySQLConstants.WRITE_ROWS_EVENT_V2:
@@ -137,6 +138,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, writeRowsEventV2.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Write Rows Event2 ... {}", txBuilder);
                 break;
 
             case MySQLConstants.UPDATE_ROWS_EVENT:
@@ -155,6 +157,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, newData));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Update Rows Event ... {}", txBuilder);
                 break;
 
             case MySQLConstants.UPDATE_ROWS_EVENT_V2:
@@ -173,6 +176,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, newData));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Update Rows Event2 ... {}", txBuilder);
                 break;
 
             case MySQLConstants.DELETE_ROWS_EVENT:
@@ -185,6 +189,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, deleteRowsEvent.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Delete Rows Event ... {}", txBuilder);
                 break;
 
             case MySQLConstants.DELETE_ROWS_EVENT_V2:
@@ -197,6 +202,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         getData(tableName, deleteRowsEventV2.getRows()));
                     txBuilder.addDataEvent(dataEvent);
                 }
+                LOGGER.trace("Bin Log Delete Rows Event2 ... {}", txBuilder);
                 break;
 
             case MySQLConstants.TABLE_MAP_EVENT:
@@ -208,6 +214,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                     if (databaseName.equals(this.databaseInfo.getDatabaseName())) {
                         if (this.databaseInfo.getAllTableNames().contains(tableName)) {
                             this.tableCache.put(tableId, tableName);
+                            LOGGER.trace("Table Cache Contents {}", this.tableCache);
                         }
                     }
                 }
@@ -228,6 +235,7 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                 .binLogPosition(toIntExact(queryEvent.getHeader().getPosition()));
                     }
                 }
+                LOGGER.trace("Transaction Event in Query Event ... {}", txBuilder);
                 break;
 
             case MySQLConstants.XID_EVENT:
@@ -239,8 +247,10 @@ public class SpoutBinLogEventListener implements BinlogEventListener {
                                                         .txTimeEnd(System.nanoTime())
                                                         .txId(xidEvent.getXid())
                                                         .build();
+                    LOGGER.trace("Adding to queue {}", txEvent);
                     this.addToQueue(txEvent);
                 }
+                LOGGER.trace("Transaction Event in Xid Event ... {}", txBuilder);
                 txBuilder.reset();
                 break;
 

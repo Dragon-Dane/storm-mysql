@@ -32,7 +32,9 @@ public enum DateTimeConverter implements Converter {
 
     @Override
     public Object convert(ColumnDataType columnDataType, Object value) {
-        if (value instanceof Date) {
+        if (value == null) {
+          return value;
+        } else if (value instanceof Date) {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             return df.format((Date) value);
         } else if (value instanceof Timestamp) {
