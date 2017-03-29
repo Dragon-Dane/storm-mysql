@@ -1,9 +1,8 @@
-A MySql Spout Metric Consumer Example
-===========================
+##A MySql Spout Metric Consumer Example
 
-##This example uses Codahale Metrics library and pushes to Jmx.
+####This example uses Codahale Metrics library and pushes to Jmx.
 
-###Create a Registry
+####Create a Registry
 
 ```java
 
@@ -39,7 +38,7 @@ public class MetricsUtil {
 }
 ```
 
-###Now a Consumer
+####Now a Consumer
 
 ```java
 
@@ -66,7 +65,7 @@ public class MySqlSpoutMetricConsumer implements IMetricsConsumer {
 
     @Override
     public void handleDataPoints(TaskInfo taskInfo, Collection<DataPoint> dataPoints) {
-        if (taskInfo.srcComponentId.equals(ServiceBooter.MYSQl_SPOUT_COMPONENT)) {
+        if (taskInfo.srcComponentId.equals("mysqlspout")) {
             for (DataPoint p : dataPoints) {
                 LOG.info("Mysql Spout Metric Consumer Data Point--->" +p.toString());
                 switch(p.name) {
