@@ -20,7 +20,7 @@
     <groupId>com.flipkart.storm-mysql</groupId>
     <artifactId>storm-mysql</artifactId>
     <packaging>jar</packaging>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2-RELEASE</version>
     <name>storm-mysql</name>
     <description>Storm Spout for Mysql Bin Logs</description>
 
