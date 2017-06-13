@@ -417,7 +417,7 @@ For using the snapshot:
 <dependency>
     <groupId>com.flipkart.storm-mysql</groupId>
     <artifactId>storm-mysql</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -508,7 +508,7 @@ It is also recommended to deactivate the topology before killing it. But haven't
 [travis]:https://travis-ci.org/flipkart-incubator/storm-mysql
 [travis img]:https://travis-ci.org/flipkart-incubator/storm-mysql.svg?branch=master
 [sonatype]:https://oss.sonatype.org/content/repositories/snapshots/com/flipkart/storm-mysql/storm-mysql
-[sonatype img]:https://img.shields.io/badge/sonatype-0.1--SNAPSHOT-orange.svg
+[sonatype img]:https://img.shields.io/badge/sonatype-0.3--SNAPSHOT-orange.svg
 [coverage]:https://coveralls.io/github/flipkart-incubator/storm-mysql?branch=master
 [coverage img]:https://coveralls.io/repos/github/flipkart-incubator/storm-mysql/badge.svg?branch=master
 [license]:LICENSE
