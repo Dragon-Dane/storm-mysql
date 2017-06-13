@@ -417,11 +417,11 @@ For using the snapshot:
 <dependency>
     <groupId>com.flipkart.storm-mysql</groupId>
     <artifactId>storm-mysql</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2-RELEASE</version>
 </dependency>
 ```
 
-Add the following to the <repositories> section in your pom.xml:
+Add the following to the <repositories> section in your pom.xml for snapshots:
 
 ```xml
 <repositories>
