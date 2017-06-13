@@ -417,7 +417,7 @@ For using the snapshot:
 <dependency>
     <groupId>com.flipkart.storm-mysql</groupId>
     <artifactId>storm-mysql</artifactId>
-    <version>0.2-RELEASE</version>
+    <version>0.2-SNAPSHOT</version>
 </dependency>
 ```
 
