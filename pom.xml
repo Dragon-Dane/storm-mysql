@@ -20,7 +20,7 @@
     <groupId>com.flipkart.storm-mysql</groupId>
     <artifactId>storm-mysql</artifactId>
     <packaging>jar</packaging>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <name>storm-mysql</name>
     <description>Storm Spout for Mysql Bin Logs</description>
 
@@ -57,7 +57,7 @@
         <junit-version>4.11</junit-version>
         <mockito-version>2.0.44-beta</mockito-version>
         <curator-version>2.9.0</curator-version>
-        <storm-version>0.9.5</storm-version>
+        <storm-version>1.0.3</storm-version>
         <mysql-connector-version>5.1.38</mysql-connector-version>
         <jackson-version>2.5.1</jackson-version>
         <guava-version>18.0</guava-version>
