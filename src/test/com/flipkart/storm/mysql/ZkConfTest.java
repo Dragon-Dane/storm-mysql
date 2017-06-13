@@ -16,8 +16,8 @@
 
 package com.flipkart.storm.mysql;
 
-import backtype.storm.Config;
 import com.google.common.collect.Lists;
+import org.apache.storm.Config;
 import org.junit.Before;
 import org.junit.Test;
 

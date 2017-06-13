@@ -16,7 +16,7 @@
 
 package com.flipkart.storm.mysql;
 
-import backtype.storm.task.TopologyContext;
+import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

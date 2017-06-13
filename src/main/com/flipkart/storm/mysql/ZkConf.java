@@ -16,7 +16,8 @@
 
 package com.flipkart.storm.mysql;
 
-import backtype.storm.Config;
+
+import org.apache.storm.Config;
 
 import java.util.List;
 import java.util.Map;

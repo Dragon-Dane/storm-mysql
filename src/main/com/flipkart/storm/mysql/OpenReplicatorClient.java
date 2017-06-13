@@ -18,7 +18,7 @@ package com.flipkart.storm.mysql;
 
 import com.flipkart.storm.mysql.schema.DatabaseInfo;
 import com.google.code.or.OpenReplicator;
-import org.apache.storm.guava.base.Strings;
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;

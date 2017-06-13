@@ -16,7 +16,8 @@
 
 package com.flipkart.storm.mysql;
 
-import backtype.storm.metric.api.ICombiner;
+
+import org.apache.storm.metric.api.ICombiner;
 
 /**
  * Max of all data points in a time slice.
